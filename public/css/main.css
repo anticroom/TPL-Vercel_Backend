@@ -1,0 +1,142 @@
+:root {
+    /* Forced Dark Scheme */
+    color-scheme: dark;
+
+        --color-background: #0f0f0f;
+        --color-on-background: #f0f0f0;
+        --color-background-hover: #1a1a1a;
+        --color-on-background-hover: #f0f0f0;
+        
+        --color-primary: #d4c217;
+        --color-primary-level: #fff389;
+        --color-primary-light: #2a2815;
+        --color-primary-hover: #e8d80a;
+        --color-primary-disabled: #1f213c;
+        --color-on-primary: #1a1a1a;
+        
+        --color-error: #de0000;
+        --color-on-error: white;
+        
+        --color-border: #2a2a2a39;
+        --color-text-secondary: #999;
+        --color-text-plus: #efffdf;
+        --color-text-minus: #ffdfdf;
+        --color-text-legacy: #ff822f;
+        --color-text-level-warning: #cc22009f;
+        --color-text-version: #efffdf5c;
+        --color-text-highlight: #fff;
+}
+
+/* Removed light mode cus it had no use for the TPL :fire: */
+
+html,
+body {
+    height: 100%;
+    zoom: 90%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    background-color: var(--color-background);
+    color: var(--color-on-background);
+}
+
+header,
+main {
+    background-color: var(--color-background);
+    color: var(--color-on-background);
+    display: grid;
+    grid-template-columns: minmax(16rem, 1fr) minmax(16rem, 2fr) minmax(
+            16em,
+            1fr
+        );
+    column-gap: 2rem;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    background: var(--color-border);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-primary);
+    border-radius: 4px; 
+}
+
+::-webkit-scrollbar-track {
+    background: #0e0d07;
+    border-radius: 4px;
+}
+
+.warning-lable {
+    color: var(--color-text-level-warning);
+    font-size: 15px;
+}
+
+header {
+    display: flex;
+    padding-inline: calc(25vw - 10rem);
+    height: 4rem;
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    z-index: 100;
+}
+
+@media screen and (min-width: 1366px) {
+    header {
+        display: grid;
+        padding-inline: 0;
+    }
+}
+
+header .logo {
+    justify-self: end;
+    align-self: center;
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    font-weight: 600;
+}
+
+header .nav {
+    flex: 1;
+}
+
+main {
+    height: 0;
+    flex: 1;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    column-gap: 2rem;
+}
+
+main > div {
+    overflow-y: auto;
+}
+
+input[type="checkbox"] {
+    height: 1.25rem;
+    width: 1.25rem;
+    cursor: pointer;
+    margin: 0;
+    accent-color: var(--color-primary);
+}
+
+* {
+    transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.rule-text {
+    margin-bottom: 2rem !important;
+    line-height: 1.6 !important;
+    display: block;
+    position: relative;
+} 
+
+.rule-text strong {
+    color: var(--color-text-highlight);
+}

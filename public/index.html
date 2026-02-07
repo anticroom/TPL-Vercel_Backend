@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script>
+        // Auto redirects for users who open the site from our old vercel link :)
+            (function() {
+                const host = window.location.hostname;
+
+                // excludes testing through localhost etc
+                const isLocalhost = host === 'localhost' || host === '127.0.0.1';
+                const isLocalNetwork = host.startsWith('192.168.');
+                const isCorrectDomain = host.endsWith('thepisslist.com');
+
+                // redirects to the new domain if on the old page
+                if (!isLocalhost && !isLocalNetwork && !isCorrectDomain) {
+                    window.location.replace('https://thepisslist.com' + window.location.pathname + window.location.search);
+                }
+            })();
+        </script>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title>The Piss List | Pretty Pissy Geometry Dash</title>
+        <meta name="description" content="The Piss List is a challenge list of piss themed GD levels!. Submit records, view the leaderboard, and challenge yourself with our challeges!" />
+        <meta name="keywords" content="Geometry Dash, Demon List, TPL, Piss, Challenge List, Pissy, GD Leaderboard, Extreme Demon, The Piss List, TPL, Geo Dash, Cube Game, water, pissing, Slop, Worst, Discord, Game, Challenge, Piss List, CeeCee" />
+
+        <meta property="og:title" content="The Piss List - Leaderboard" />
+        <meta property="og:description" content="View the hardest Geometry Dash levels and player rankings on TPL." />
+        <meta property="og:image" content="https://thepisslist.com/list_icon.png" />
+        <meta property="og:url" content="https://thepisslist.com" />
+        <meta property="og:type" content="website" />
+
+        <link rel="icon" href="/list_icon.png" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@500;700&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" type="text/css" href="/css/reset.css" />
+        <link rel="stylesheet" type="text/css" href="/css/typography.css" />
+        <link rel="stylesheet" type="text/css" href="/css/main.css" />
+        <link rel="stylesheet" type="text/css" href="/css/loading.css" />
+        <link rel="stylesheet" type="text/css" href="/css/pages/list.css" />
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href="/css/pages/leaderboard.css"
+        />
+        <link rel="stylesheet" type="text/css" href="/css/pages/ListPacks.css" />
+        <link rel="stylesheet" type="text/css" href="/css/pages/roulette.css" />
+        <link rel="stylesheet" type="text/css" href="/css/pages/admin.css" />
+        <link rel="stylesheet" type="text/css" href="/css/pages/manage.css" />
+        <link rel="stylesheet" type="text/css" href="/css/components/nav.css" />
+        <link rel="stylesheet" type="text/css" href="/css/components/btn.css" />
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href="/css/components/tabs.css"
+        />
+        <script src="https://unpkg.com/vue@3.2.31/dist/vue.global.js"></script>
+        <script src="https://unpkg.com/vue-router@4.0.14/dist/vue-router.global.prod.js"></script>
+        <script type="module" src="/js/main.js"></script>
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8857138658839773" crossorigin="anonymous"></script>
+    </head>
+    <body id="app">
+        <noscript>
+            <h1>The Piss List - Leaderboard</h1>
+            <p>Welcome to The Piss List (TPL), tracking the hardest pissy Geometry Dash levels and top players.</p>
+            <a href="/leaderboard">View Leaderboard</a>
+        </noscript>
+        <header>
+            <div class="logo">
+                <h2>TPL</h2>
+                <p class="version-numb">v2.1.8</p>
+            </div>
+            <nav class="nav">
+                <router-link class="nav__tab" to="/">
+                    <span class="type-label-lg">List</span>
+                </router-link>
+                <router-link class="nav__tab" to="/packs">
+                    <span class="type-label-lg">Packs</span>
+                </router-link>
+                <router-link class="nav__tab" to="/leaderboard">
+                    <span class="type-label-lg">Leaderboard</span>
+                </router-link>
+                <router-link class="nav__tab" to="/roulette">
+                    <span class="type-label-lg">Roulette</span>
+                </router-link>
+<div class="nav__actions">
+<a class="nav__icon" href="https://discord.gg/dG8QVEBSGA">
+                        <img src="/assets/discord.svg" alt="Discord Logo" />
+                    </a>
+                    <a
+                        class="nav__cta type-label-lg"
+                        href="https://forms.gle/cvAGnxYb6fkUTUNU7"
+                        target="_blank"
+                        >Submit Record</a
+                    >
+                     <a
+                     class="nav__cta type-label-lg"
+                     href="https://forms.gle/2yF5CQMDYHrg5fWx9"
+                     target="_blank"
+                     >Submit Level</a
+                    >
+                </div>
+            </nav>
+        </header>
+        <router-view></router-view>
+    </body>
+</html>

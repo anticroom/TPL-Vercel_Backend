@@ -1,0 +1,20 @@
+{
+  "name": "the-piss-list",
+  "version": "2.0.3",
+  "description": "The Piss List website",
+  "scripts": {
+    "build": "echo 'Static site'"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": "22.x"
+  },
+  "dependencies": {
+    "@vercel/postgres": "^0.10.0",
+    "dotenv": "^17.2.3",
+    "jsonwebtoken": "^9.0.3",
+    "node-fetch": "^3.3.2",
+    "pg": "^8.16.3",
+    "postgres": "^3.4.7"
+  }
+}

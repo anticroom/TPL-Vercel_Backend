@@ -1,0 +1,10 @@
+.idea/
+.vscode/
+deno.json
+
+node_modules/
+
+.vercel
+data/
+/api/_logins.json
+.env

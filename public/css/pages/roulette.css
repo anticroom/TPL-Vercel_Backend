@@ -1,0 +1,333 @@
+main.page-roulette {
+    display: block !important;
+    height: auto !important;
+    overflow-y: visible !important;
+    padding: 0 !important;
+}
+
+main.page-roulette > div {
+    overflow: visible !important;
+}
+
+.page-roulette [class*="type-"]::before,
+.page-roulette [class*="type-"]::after {
+    content: none !important;
+    display: none !important;
+}
+
+.page-roulette [class*="type-"] {
+    line-height: 1.4 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.roulette-wrapper {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.roulette-layout {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+.roulette-controls {
+    flex: 0 0 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky;
+    top: 20px;
+}
+
+.roulette-game {
+    flex: 1;
+    min-width: 0;
+}
+
+@media (max-width: 950px) {
+    .roulette-layout {
+        flex-direction: column;
+    }
+    .roulette-controls {
+        flex: none;
+        width: 100%;
+        position: static;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    .control-card {
+        flex: 1;
+        min-width: 250px;
+    }
+}
+
+.control-card, .level-card, .results-card, .empty-state {
+    background-color: var(--color-primary-light);
+    border: 2px solid var(--color-border);
+    border-radius: 12px;
+    padding: 20px;
+    box-sizing: border-box;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+main.dark .control-card, 
+main.dark .level-card, 
+main.dark .results-card, 
+main.dark .empty-state {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.control-header h3 {
+    margin-bottom: 12px !important;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-highlight);
+}
+
+.toggles {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.check {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+    min-height: 24px;
+}
+
+.check input {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--color-primary);
+    cursor: pointer;
+    margin: 0;
+}
+
+.check label {
+    cursor: pointer;
+    transform: translateY(1px);
+}
+
+.btns-row {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-start { width: 100%; }
+.btn-small { flex: 1; padding: 10px; }
+
+.level-card {
+    text-align: center;
+    border-color: var(--color-primary);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+}
+
+.card-header {
+    margin-bottom: 20px;
+}
+
+.card-header .tag {
+    display: inline-block;
+    background: var(--color-primary);
+    color: #000;
+    padding: 4px 12px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 10px !important;
+}
+
+.level-name {
+    margin: 8px 0 !important;
+    word-wrap: break-word;
+    line-height: 1.1 !important;
+}
+
+.level-rank {
+    margin-top: 5px !important;
+    opacity: 0.9;
+}
+
+.video-wrapper {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.video-frame {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+}
+
+.instruction {
+    opacity: 0.8;
+    margin-bottom: 12px !important;
+}
+
+.actions-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.percent-input {
+    width: 100%;
+    padding: 12px;
+    text-align: center;
+    border-radius: 8px;
+    border: 2px solid var(--color-border);
+    background: rgba(255,255,255,0.1);
+    color: inherit;
+    font-weight: bold;
+}
+
+.percent-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.action-btns {
+    display: flex;
+    width: 100%;
+    gap: 10px;
+}
+
+.action-btns button {
+    flex: 1;
+}
+
+button.btn-success { background-color: #27ae60 !important; color: white !important; border: none; }
+button.btn-danger { background-color: #c0392b !important; color: white !important; border: none; }
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.stat {
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.stat .label {
+    opacity: 0.7;
+    text-transform: uppercase;
+    font-size: 0.85em;
+}
+
+.stat .value {
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+.lists-wrapper {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.list-section h3 {
+    margin-bottom: 12px !important;
+    padding-left: 10px;
+    border-left: 4px solid var(--color-primary);
+    color: var(--color-text-highlight);
+}
+
+.level-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    height: auto;
+}
+
+.level-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.rank-tag {
+    background: rgba(0,0,0,0.2);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    min-width: 40px;
+    text-align: center;
+}
+
+.level-list-item.completed {
+    border-left: 4px solid #27ae60;
+}
+
+.level-list-item.faded {
+    opacity: 0.6;
+}
+
+.level-percent { 
+    color: #27ae60; 
+    font-weight: 700;
+}
+
+.level-req { 
+    color: var(--color-error); 
+    font-weight: 700; 
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+.empty-icon { font-size: 4rem; margin-bottom: 15px !important; }
+
+.toasts-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.toast {
+    background: #e74c3c;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

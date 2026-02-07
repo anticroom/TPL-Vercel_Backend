@@ -1,0 +1,33 @@
+.tabs {
+    display: flex;
+    border-bottom: 2px solid var(--color-border);
+    gap: 0.5rem;
+}
+
+.tabs .tab {
+    border: none;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+    padding: 1rem 1.25rem;
+    margin: 0;
+    background-color: transparent;
+    color: var(--color-text-secondary);
+    border-bottom: 3px solid transparent;
+    position: relative;
+    border-radius: 0.4rem 0.4rem 0 0;
+    outline: none;
+    margin-bottom: -2px;
+    transition: all 200ms ease;
+}
+
+.tabs .tab:hover {
+    background-color: var(--color-primary-light);
+    color: var(--color-on-background);
+}
+
+.tabs .tab.selected {
+    border-bottom: 3px solid var(--color-primary);
+    color: var(--color-on-background);
+    background-color: var(--color-primary-light);
+}
