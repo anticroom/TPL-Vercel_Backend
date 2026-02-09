@@ -102,6 +102,12 @@ export default {
                     <div class="errors" v-show="errors.length > 0">
                         <p class="error" v-for="error of errors">{{ error }}</p>
                     </div>
+
+                    <p style="margin-bottom: 20px; font-size: 0.9rem; opacity: 0.8;">
+                        Our List is open source! 
+                        <a href="https://github.com/anticroom/TPL-Vercel_Backend" target="_blank" style="text-decoration: underline; color: inherit;">Press To View Repo <3</a>
+                    </p>
+
                     <template v-if="editors">
                         <h3>List Editors</h3>
                         <ol class="editors">

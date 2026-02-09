@@ -6,6 +6,7 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
     if (req.method === 'OPTIONS') return res.status(200).end();
 
     try {
@@ -13,7 +14,6 @@ export default async function handler(req, res) {
         const { oldLevelId, newLevelData } = req.body;
 
         if (!oldLevelId || !newLevelData) return res.status(400).json({ error: 'Missing Data' });
-
         const findRes = await query("SELECT id, name, rank, data FROM public.levels WHERE id = $1", [oldLevelId]);
 
         if (findRes.rows.length === 0) {
@@ -27,9 +27,7 @@ export default async function handler(req, res) {
             ...oldContent,
             ...newLevelData
         };
-
         const newName = updatedContent.name || currentDBRow.name;
-
         await query(
             'UPDATE public.levels SET data = $1, name = $2 WHERE id = $3',
             [updatedContent, newName, oldLevelId]

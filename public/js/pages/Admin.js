@@ -126,7 +126,9 @@ export default {
                                             <span class="drag-handle" v-if="!searchQuery">::</span>
                                         </div>
                                     </td>
-                                    <td style="font-weight:700;">{{ level.name }}</td>
+                                    <td>
+                                        <span style="font-weight:700;">{{ level.name }}</span>
+                                    </td>
                                     <td>{{ level.records?.length || 0 }}</td>
                                     <td class="actions">
                                         <button class="btn-icon" @click.stop="openEditRecordsModal(level)">✎</button>
@@ -173,7 +175,7 @@ export default {
                                      @dragover.prevent="onDragOverPack($event, idx)" 
                                      @drop.stop
                                      :class="{ 'is-dragging': draggedPackIndex === idx }">
-                                    <span>{{ lvl.name }}</span>
+                                    <span>{{ lvl.name }} <small style="opacity:0.5">({{ lvl.id }})</small></span>
                                     <button @click="removeFromPack(idx)" class="btn-icon-sm">✕</button>
                                 </div>
                             </div>
@@ -191,7 +193,7 @@ export default {
                                               style="margin-right:8px;">
                                             #{{ getOriginalIndex(lvl) }}
                                         </span> 
-                                        {{ lvl.name }}
+                                        {{ lvl.name }} <small style="opacity:0.5">({{ lvl.author }})</small>
                                     </div>
                                     <span class="goldhighlight">+</span>
                                 </div>
@@ -584,7 +586,7 @@ export default {
             try {
                 const res = await fetch('/api/add-level', { method: 'POST', headers: this.getAuthHeaders(), body: JSON.stringify(payload) });
                 if (res.status === 401) { this.logout(); return; }
-                if (res.ok) { this.successMessage = "Added!"; this.formData = { id: null, name: '', author: '', verifier: '', verification: '', percentToQualify: 100, password: 'free Copyable', records: [], placement: null }; await this.refreshLevels(); } else { this.errorMessage = "Failed"; }
+                if (res.ok) { this.successMessage = "Added!"; this.formData = { id: null, name: '', author: '', verifier: '', verification: '', percentToQualify: 100, password: 'free Copyable', records: [], creators: [], placement: null }; await this.refreshLevels(); } else { this.errorMessage = "Failed"; }
             } catch (e) { this.errorMessage = "Error"; } finally { this.isSubmitting = false; }
         },
         async deleteLevel(level) {

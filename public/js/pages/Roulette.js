@@ -125,7 +125,10 @@ export default {
                                               :style="level.rank > 150 ? 'color: var(--color-text-legacy)' : ''">
                                             #{{ level.rank }}
                                         </span>
-                                        <strong class="type-label-lg">{{ level.name }}</strong>
+                                        <strong class="type-label-lg">
+                                            {{ level.name }} 
+                                            <span style="font-size:0.7em; font-weight:normal; opacity:0.7;">{{ level.id }}</span>
+                                        </strong>
                                     </div>
                                     <div class="level-req type-label-md" style="color: var(--color-error)">{{ currentPercentage + 2 + i }}%</div>
                                 </div>
@@ -140,7 +143,10 @@ export default {
                                               :style="level.rank > 150 ? 'color: var(--color-text-legacy)' : ''">
                                             #{{ level.rank }}
                                         </span>
-                                        <strong class="type-label-lg">{{ level.name }}</strong>
+                                        <strong class="type-label-lg">
+                                            {{ level.name }}
+                                            <span style="font-size:0.7em; font-weight:normal; opacity:0.7;">{{ level.id }}</span>
+                                        </strong>
                                     </div>
                                     <div class="level-percent type-label-lg" style="color: #2ecc71">{{ progression[progression.length - 1 - i] }}%</div>
                                 </div>
