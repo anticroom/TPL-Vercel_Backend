@@ -1,7 +1,7 @@
 
 # The Piss List
 
-An improved Fork of the **Shitty List** template, developed by **Anticroom** for better level management and stability.
+An improved Fork of the **Shitty List** template, developed by **Anticroom** for better level management and useablity.
 
 ## Improvements
 
