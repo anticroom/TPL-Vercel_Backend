@@ -1,4 +1,4 @@
-
+#- These docs are out of date since I'm a bit lazy on changing these to include all recent changes
 # The Piss List
 
 An improved Fork of the **Shitty List** template, developed by **Anticroom** for better level management and useablity.
