@@ -1,5 +1,4 @@
 :root {
-    /* Forced Dark Scheme */
     color-scheme: dark;
 
     --color-background: #0f0f0f;
@@ -7,7 +6,7 @@
     --color-background-hover: #1a1a1a;
     --color-on-background-hover: #f0f0f0;
 
-    --color-primary: #f3d511;
+    --color-primary: #d4c217;
     --color-primary-level: #fff389;
     --color-primary-light: #2a2815;
     --color-primary-hover: #e8d80a;
@@ -20,15 +19,13 @@
     --color-border: #2a2a2a39;
     --color-text-secondary: #999;
     --color-text-plus: #efffdf;
+    --color-text-record-gold: #f7fff0;
     --color-text-minus: #ffdfdf;
     --color-text-legacy: #ff822f;
     --color-text-level-warning: #cc22009f;
     --color-text-version: #efffdf5c;
     --color-text-highlight: #fff;
 }
-
-/* Removed light mode cus it had no use for the TPL (my eyes were killed before) */
-
 html,
 body {
     height: 100%;
@@ -74,13 +71,15 @@ main {
 }
 
 header {
+    position: sticky;
+    top: 0;
+    z-index: 9999;
     display: flex;
     padding-inline: calc(25vw - 10rem);
     height: 4rem;
     background-color: var(--color-primary);
     color: var(--color-on-primary);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    z-index: 100;
 }
 
 @media screen and (min-width: 1366px) {
@@ -136,4 +135,48 @@ input[type="checkbox"] {
 
 .rule-text strong {
     color: var(--color-text-highlight);
+}
+
+@media screen and (max-width: 1024px) {
+    header, main {
+        grid-template-columns: 1fr;
+        padding-inline: 0;
+        column-gap: 0;
+    }
+    
+    html, body {
+        height: auto;
+        min-height: 100%;
+    }
+    
+    header {
+        position: sticky; 
+        top: 0;
+        z-index: 9999;
+        height: auto; 
+        padding-block: 12px 8px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+    }
+    
+    header .logo {
+        justify-self: flex-start;
+        width: 100%;
+        justify-content: flex-start;
+        padding-inline: 15px;
+        margin-bottom: 0;
+        padding-right: 180px; 
+        box-sizing: border-box;
+    }
+    
+    main {
+        height: auto;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    main>div {
+        overflow-y: visible;
+    }
 }

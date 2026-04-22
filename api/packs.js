@@ -11,17 +11,20 @@ export default async function handler(req, res) {
 
     if (req.method === 'GET') {
         try {
-            const result = await query("SELECT * FROM public.packs ORDER BY name ASC");
+            const listType = req.query.type || 'TPCL';
+            const result = await query("SELECT * FROM public.packs WHERE list_type = $1 ORDER BY name ASC", [listType]);
             return res.status(200).json(result.rows);
         } catch (error) {
+            console.error("Failed to fetch packs:", error);
             return res.status(500).json({ error: error.message });
         }
     }
 
     if (req.method === 'POST') {
         try {
-            const decoded = verifyToken(req);
-            const { action } = req.body;
+            const decoded = await verifyToken(req);
+            const { action, type } = req.body;
+            const listType = type || 'TPCL';
 
             if (decoded.role !== 'admin' && decoded.role !== 'management') {
                 await auditLog(decoded, "UNAUTHORIZED_ACCESS", { target: "Pack Management" });
@@ -33,14 +36,14 @@ export default async function handler(req, res) {
                 if (!id || !name) return res.status(400).json({ error: "Missing fields" });
 
                 await query(
-                    `INSERT INTO public.packs (id, name, color, levels)
-                     VALUES ($1, $2, $3, $4)
+                    `INSERT INTO public.packs (id, name, color, levels, list_type)
+                     VALUES ($1, $2, $3, $4, $5)
                      ON CONFLICT (id) DO UPDATE 
-                     SET name = $2, color = $3, levels = $4`,
-                    [id, name, color, levels]
+                     SET name = $2, color = $3, levels = $4, list_type = $5`,
+                    [id, name, color, levels, listType]
                 );
 
-                await auditLog(decoded, "UPDATE_PACK", { pack: name, levels: levels.length });
+                await auditLog(decoded, "UPDATE_PACK", { pack: name, list: listType, levels: levels.length });
                 return res.status(200).json({ success: true });
             }
 
@@ -48,14 +51,15 @@ export default async function handler(req, res) {
                 const { id } = req.body;
                 if (!id) return res.status(400).json({ error: "Missing ID" });
 
-                await query("DELETE FROM public.packs WHERE id = $1", [id]);
-                await auditLog(decoded, "DELETE_PACK", { id });
+                await query("DELETE FROM public.packs WHERE id = $1 AND list_type = $2", [id, listType]);
+                await auditLog(decoded, "DELETE_PACK", { id, list: listType });
                 return res.status(200).json({ success: true });
             }
 
             return res.status(400).json({ error: "Invalid action" });
 
         } catch (error) {
+            console.error("Pack Admin Error:", error);
             return res.status(401).json({ error: "Unauthorized or Server Error" });
         }
     }

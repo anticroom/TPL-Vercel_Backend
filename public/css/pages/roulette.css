@@ -49,47 +49,29 @@ main.page-roulette>div {
     min-width: 0;
 }
 
-@media (max-width: 950px) {
-    .roulette-layout {
-        flex-direction: column;
-    }
-
-    .roulette-controls {
-        flex: none;
-        width: 100%;
-        position: static;
-        flex-direction: row;
-        flex-wrap: wrap;
-    }
-
-    .control-card {
-        flex: 1;
-        min-width: 250px;
-    }
-}
-
 .control-card,
 .level-card,
 .results-card,
 .empty-state {
     background-color: var(--color-primary-light);
     border: 2px solid var(--color-border);
-    border-radius: 12px;
-    padding: 20px;
+    border-radius: 16px;
+    padding: 24px;
     box-sizing: border-box;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 main.dark .control-card,
 main.dark .level-card,
 main.dark .results-card,
 main.dark .empty-state {
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.25);
+    border-color: rgba(255, 255, 255, 0.08);
 }
 
 .control-header h3 {
-    margin-bottom: 12px !important;
-    padding-bottom: 10px;
+    margin-bottom: 16px !important;
+    padding-bottom: 12px;
     border-bottom: 1px solid var(--color-border);
     color: var(--color-text-highlight);
 }
@@ -97,65 +79,99 @@ main.dark .empty-state {
 .toggles {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.list-group {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 12px;
 }
 
 .check {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     cursor: pointer;
     user-select: none;
-    min-height: 24px;
+    min-height: 44px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background 0.2s ease;
+}
+
+.check:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.check:active {
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .check input {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     accent-color: var(--color-primary);
     cursor: pointer;
     margin: 0;
+    flex-shrink: 0;
 }
 
 .check label {
     cursor: pointer;
-    transform: translateY(1px);
+    flex: 1;
+}
+
+.sub-checks {
+    margin-left: 20px;
+    margin-top: 4px;
+    padding-left: 12px;
+    border-left: 2px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .btns-row {
     display: flex;
-    gap: 10px;
+    gap: 12px;
 }
 
 .btn-start {
     width: 100%;
+    padding: 16px;
+    font-size: 1.1rem;
+    border-radius: 12px;
 }
 
 .btn-small {
     flex: 1;
-    padding: 10px;
+    padding: 12px;
+    border-radius: 10px;
 }
 
 .level-card {
     text-align: center;
     border-color: var(--color-primary);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 30px rgba(255, 110, 231, 0.15);
 }
 
 .card-header {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
 
 .card-header .tag {
     display: inline-block;
     background: var(--color-primary);
-    color: #000;
-    padding: 4px 12px;
+    color: var(--color-on-primary);
+    padding: 6px 16px;
     border-radius: 20px;
     text-transform: uppercase;
     font-weight: 700;
-    margin-bottom: 10px !important;
+    margin-bottom: 12px !important;
+    letter-spacing: 0.5px;
 }
 
 .level-name {
@@ -165,103 +181,114 @@ main.dark .empty-state {
 }
 
 .level-rank {
-    margin-top: 5px !important;
+    margin-top: 8px !important;
     opacity: 0.9;
 }
 
 .video-wrapper {
     position: relative;
     width: 100%;
-    padding-bottom: 56.25%;
+    aspect-ratio: 16/9;
     background: #000;
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.video-frame {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-
-.instruction {
-    opacity: 0.8;
-    margin-bottom: 12px !important;
+.video-wrapper .video-container,
+.video-wrapper iframe {
+    width: 100% !important;
+    height: 100% !important;
+    border: none;
+    display: block;
 }
 
 .actions-form {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
+    gap: 16px;
     width: 100%;
-    max-width: 400px;
+    max-width: 450px;
     margin: 0 auto;
 }
 
 .percent-input {
     width: 100%;
-    padding: 12px;
+    padding: 16px;
     text-align: center;
-    border-radius: 8px;
+    border-radius: 12px;
     border: 2px solid var(--color-border);
-    background: rgba(255, 255, 255, 0.1);
-    color: inherit;
-    font-weight: bold;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-on-background);
+    font-weight: 700;
+    font-size: 1.4rem;
+    transition: all 0.2s ease;
 }
 
 .percent-input:focus {
     outline: none;
     border-color: var(--color-primary);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 0 4px rgba(255, 110, 231, 0.15);
 }
 
 .action-btns {
     display: flex;
     width: 100%;
-    gap: 10px;
+    gap: 12px;
 }
 
 .action-btns button {
     flex: 1;
+    padding: 16px;
+    font-size: 1.1rem;
+    border-radius: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 button.btn-success {
     background-color: #27ae60 !important;
     color: white !important;
     border: none;
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
 }
 
 button.btn-danger {
-    background-color: #c0392b !important;
+    background-color: #e74c3c !important;
     color: white !important;
     border: none;
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
 }
 
 .stats-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-top: 20px;
+    gap: 16px;
+    margin-top: 24px;
 }
 
 .stat {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 15px;
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 20px;
+    border-radius: 12px;
     border: 1px solid var(--color-border);
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 8px;
+    align-items: center;
 }
 
 .stat .label {
     opacity: 0.7;
     text-transform: uppercase;
-    font-size: 0.85em;
+    letter-spacing: 0.5px;
 }
 
 .stat .value {
@@ -270,15 +297,15 @@ button.btn-danger {
 }
 
 .lists-wrapper {
-    margin-top: 30px;
+    margin-top: 32px;
     display: flex;
     flex-direction: column;
-    gap: 25px;
+    gap: 28px;
 }
 
 .list-section h3 {
-    margin-bottom: 12px !important;
-    padding-left: 10px;
+    margin-bottom: 16px !important;
+    padding-left: 12px;
     border-left: 4px solid var(--color-primary);
     color: var(--color-text-highlight);
 }
@@ -287,26 +314,31 @@ button.btn-danger {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 16px;
-    background: rgba(255, 255, 255, 0.05);
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--color-border);
-    border-radius: 6px;
-    margin-bottom: 8px;
+    border-radius: 10px;
+    margin-bottom: 10px;
     height: auto;
+    transition: background 0.2s;
+}
+
+.level-list-item:hover {
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .level-info {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
 }
 
 .rank-tag {
-    background: rgba(0, 0, 0, 0.2);
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-weight: bold;
-    min-width: 40px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    min-width: 48px;
     text-align: center;
 }
 
@@ -315,56 +347,145 @@ button.btn-danger {
 }
 
 .level-list-item.faded {
-    opacity: 0.6;
+    opacity: 0.5;
 }
 
 .level-percent {
     color: #27ae60;
     font-weight: 700;
+    font-size: 1.2rem;
 }
 
 .level-req {
     color: var(--color-error);
     font-weight: 700;
+    font-size: 1.2rem;
 }
 
 .empty-state {
     text-align: center;
-    padding: 60px 20px;
+    padding: 80px 20px;
 }
 
 .empty-icon {
-    font-size: 4rem;
-    margin-bottom: 15px !important;
+    font-size: 5rem;
+    margin-bottom: 20px !important;
 }
 
 .toasts-container {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
+    bottom: 24px;
+    right: 24px;
     z-index: 9999;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 
 .toast {
     background: #e74c3c;
     color: white;
-    padding: 12px 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    animation: fadeIn 0.3s;
+    padding: 14px 24px;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    font-weight: 600;
 }
 
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(15px) scale(0.95);
     }
-
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 950px) {
+    .roulette-layout {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .roulette-game {
+        width: 100%;
+    }
+    .roulette-layout.is-playing {
+        flex-direction: column-reverse;
+    }
+    .roulette-controls {
+        flex: none;
+        width: 100%;
+        position: static;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    .control-card {
+        flex: 1;
+        min-width: 250px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .roulette-wrapper {
+        padding: 1rem 0.5rem;
+    }
+    .roulette-layout {
+        gap: 16px;
+    }
+    .roulette-controls {
+        flex-direction: column;
+        gap: 16px;
+    }
+    .control-card, .level-card, .results-card, .empty-state {
+        padding: 16px;
+        border-radius: 12px;
+    }
+    .card-header h1.level-name {
+        font-size: 28px !important;
+    }
+    .card-header .level-rank {
+        font-size: 18px !important;
+    }
+    .video-wrapper {
+        border-radius: 8px;
+    }
+    .percent-input {
+        padding: 18px;
+        font-size: 1.6rem !important;
+    }
+    .action-btns button {
+        padding: 18px;
+        font-size: 1.15rem;
+    }
+    .level-list-item {
+        padding: 14px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .level-info {
+        width: 100%;
+    }
+    .level-percent, .level-req {
+        align-self: flex-end;
+        margin-top: -34px; 
+    }
+    .stats-grid {
+        gap: 12px;
+    }
+    .stat {
+        padding: 16px 12px;
+    }
+    .lists-wrapper {
+        margin-top: 24px;
+        gap: 24px;
+    }
+    .empty-state {
+        padding: 40px 16px;
+    }
+    .empty-icon {
+        font-size: 4rem;
     }
 }

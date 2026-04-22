@@ -8,6 +8,7 @@ import Submit from './pages/Submit.js';
 
 export default [
     { path: '/', component: List },
+    { path: '/:type/:_id', component: List },
     { path: '/leaderboard', component: Leaderboard },
     { path: '/roulette', component: Roulette },
     { path: '/admin', component: Admin },

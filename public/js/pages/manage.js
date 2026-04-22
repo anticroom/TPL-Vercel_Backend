@@ -1,11 +1,39 @@
 import { store } from '../main.js';
-import Spinner from '../components/Spinner.js';
 
 export default {
-    components: { Spinner },
     template: `
-        <main v-if="loading" class="loading-container">
-            <Spinner></Spinner>
+        <main v-if="loading" class="page-manage-dashboard">
+            <div class="manage-nav-bar">
+                <div class="manage-nav-top">
+                    <div class="skeleton skel-title" style="width: 200px; height: 32px; margin: 0;"></div>
+                    <div class="skeleton" style="width: 80px; height: 32px; border-radius: 4px;"></div>
+                </div>
+                <div class="tab-nav">
+                    <div class="skeleton" style="width: 100px; height: 36px; border-radius: 4px 4px 0 0;"></div>
+                    <div class="skeleton" style="width: 100px; height: 36px; border-radius: 4px 4px 0 0;"></div>
+                    <div class="skeleton" style="width: 160px; height: 36px; border-radius: 4px 4px 0 0;"></div>
+                </div>
+            </div>
+
+            <div class="manage-workspace">
+                <aside class="manage-sidebar" style="opacity: 0.7;">
+                    <div class="skeleton" style="width: 100%; height: 40px; border-radius: 4px; margin-bottom: 1.5rem;"></div>
+                    <div class="skeleton skel-text" style="width: 60%; height: 16px; margin-bottom: 1rem;"></div>
+                    <div v-for="n in 3" :key="n" style="margin-bottom: 1.5rem;">
+                        <div class="skeleton skel-text" style="width: 30%; height: 14px; margin-bottom: 0.5rem;"></div>
+                        <div class="skeleton" style="width: 100%; height: 40px; border-radius: 4px;"></div>
+                    </div>
+                </aside>
+
+                <section class="manage-content" style="opacity: 0.7;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <div class="skeleton skel-title" style="width: 150px; height: 32px; margin: 0;"></div>
+                        <div class="skeleton" style="width: 250px; height: 40px; border-radius: 4px;"></div>
+                    </div>
+                    <div class="skeleton" style="width: 100%; height: 48px; border-radius: 4px; margin-bottom: 8px;"></div>
+                    <div v-for="n in 8" :key="'tr-'+n" class="skeleton skel-table-row" style="height: 54px;"></div>
+                </section>
+            </div>
         </main>
 
         <main v-else-if="!isAuthenticated" class="page-manage-auth">
@@ -38,171 +66,168 @@ export default {
         </main>
 
         <main v-else class="page-manage-dashboard">
-            
-            <aside class="manage-sidebar">
-                <div class="sidebar-header">
-                    <h2>Login Management </h2>
-                    <button @click="logout" class="btn-logout">LOGOUT</button>
-                </div>
-                
-                <div class="divider"></div>
-
-                <div style="margin-bottom: 1.5rem;">
-                     <button @click="openEditorsModal" class="btn-goto-admin">
-                        ✎ Edit Listed Editors
-                     </button>
-                </div>
-
-                <div class="form-section-title">ADD NEW {{ currentTab === 'management' ? 'MANAGER' : currentTab === 'admin' ? 'ADMIN' : 'MOD' }}</div>
-                
-                <form @submit.prevent="addUser" class="create-form">
-                    <div class="input-group">
-                        <label>Username</label>
-                        <input v-model="formData.username" type="text" placeholder="Username" required />
+            <div class="manage-nav-bar">
+                <div class="manage-nav-top">
+                    <h2>Login Management</h2>
+                    <div class="manage-nav-actions">
+                        <button @click="logout" class="btn-logout">LOGOUT</button>
                     </div>
+                </div>
+                <div class="tab-nav">
+                    <button class="tab-btn" :class="{ active: currentTab === 'admin' }" @click="currentTab = 'admin'">Admins</button>
+                    <button class="tab-btn" :class="{ active: currentTab === 'mod' }" @click="currentTab = 'mod'">Mods</button>
+                    <button class="tab-btn" :class="{ active: currentTab === 'management' }" @click="currentTab = 'management'">Owners</button>
+                </div>
+            </div>
+
+            <div class="manage-workspace">
+                <div class="mobile-sidebar-overlay" v-if="isMobileSidebarOpen" @click="isMobileSidebarOpen = false"></div>
+                
+                <button class="mobile-fab-btn" @click="isMobileSidebarOpen = true">
+                    <i class="fa-solid fa-user-plus" style="font-weight: 300;">+</i>
+                </button>
+
+                <aside class="manage-sidebar" :class="{ 'is-open': isMobileSidebarOpen }">
+                    <div class="mobile-sidebar-header">
+                        <h3>Management Menu</h3>
+                        <button class="btn-close-sidebar" @click="isMobileSidebarOpen = false">✕</button>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                         <button @click="openEditorsModal" class="btn-goto-admin">
+                            ✎ Edit Listed Editors
+                         </button>
+                    </div>
+
+                    <h3 class="form-section-title" style="border-bottom: 1px solid var(--color-border); padding-bottom: 5px;">
+                        ADD NEW {{ currentTab === 'management' ? 'MANAGER' : currentTab === 'admin' ? 'ADMIN' : 'MOD' }}
+                    </h3>
                     
-                    <div class="input-group">
-                        <label>Email</label>
-                        <input v-model="formData.email" type="email" placeholder="email@example.com" required />
-                    </div>
+                    <form @submit.prevent="addUser" class="create-form" style="margin-top: 1rem;">
+                        <div class="input-group">
+                            <label>Username</label>
+                            <input v-model="formData.username" type="text" placeholder="Username" required />
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>Email</label>
+                            <input v-model="formData.email" type="email" placeholder="email@example.com" required />
+                        </div>
 
-                    <div class="input-group">
-                        <label>Password</label>
-                        <div class="password-input-wrapper">
-                            <input 
-                                v-model="formData.password" 
-                                :type="showNewPassword ? 'text' : 'password'" 
-                                placeholder="Password" 
-                                required 
-                                style="padding-right: 40px;"
-                            />
-                            <button 
-                                type="button" 
-                                class="btn-icon" 
-                                @click="showNewPassword = !showNewPassword" 
-                                :title="showNewPassword ? 'Hide Password' : 'Show Password'"
-                                style="position: absolute; right: 5px; background: none; border: none; cursor: pointer;"
-                            >
-                                {{ showNewPassword ? '✕' : '👁' }}
+                        <div class="input-group">
+                            <label>Password</label>
+                            <div class="password-input-wrapper">
+                                <input 
+                                    v-model="formData.password" 
+                                    :type="showNewPassword ? 'text' : 'password'" 
+                                    placeholder="Password" 
+                                    required 
+                                    style="padding-right: 40px;"
+                                />
+                                <button 
+                                    type="button" 
+                                    class="btn-icon-sm" 
+                                    @click="showNewPassword = !showNewPassword" 
+                                    :title="showNewPassword ? 'Hide Password' : 'Show Password'"
+                                    style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--color-text-secondary);"
+                                >
+                                    {{ showNewPassword ? '✕' : '👁' }}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-footer">
+                            <button type="submit" class="btn-primary full-width" :disabled="isSaving">
+                                {{ isSaving ? 'Saving...' : 'Add & Save Account' }}
                             </button>
                         </div>
-                    </div>
-
-                    <div class="form-footer">
-                        <button type="submit" class="btn-primary full-width" :disabled="isSaving">
-                            {{ isSaving ? 'Saving...' : 'Add & Save Account' }}
-                        </button>
-                    </div>
+                        
+                        <p v-if="sidebarMessage" :class="sidebarError ? 'status-msg error' : 'status-msg success'">{{ sidebarMessage }}</p>
+                    </form>
                     
-                    <p v-if="sidebarMessage" :class="sidebarError ? 'status-msg error' : 'status-msg success'">{{ sidebarMessage }}</p>
-                </form>
-                
-                <div style="margin-top: auto;">
-                    <button class="btn-goto-admin" onclick="window.location.href='/#/admin'">
-                        Go To Admin Page
-                    </button>
-                </div>
-            </aside>
+                    <div style="margin-top: auto; padding-top: 2rem;">
+                        <button class="btn-goto-admin" onclick="window.location.href='/#/admin'">
+                            Go To Admin Page
+                        </button>
+                    </div>
+                </aside>
 
-            <section class="manage-content">
-                <div class="content-toolbar">
-                    <div class="toolbar-top">
-                        <div class="stats">
-                            <h3>{{ currentTab === 'management' ? 'Managers' : currentTab === 'admin' ? 'Admins' : 'Mods' }}</h3>
-                            <span class="badge">{{ currentList.length }}</span>
-                        </div>
-                        <div class="search-wrapper">
-                            <input v-model="searchQuery" type="text" placeholder="Search users..." />
+                <section class="manage-content">
+                    <div class="content-toolbar">
+                        <div class="toolbar-top">
+                            <div class="stats">
+                                <h3>{{ currentTab === 'management' ? 'Managers' : currentTab === 'admin' ? 'Admins' : 'Mods' }}</h3>
+                                <span class="badge">{{ currentList.length }}</span>
+                            </div>
+                            <div class="search-wrapper">
+                                <input v-model="searchQuery" type="text" placeholder="Search users..." class="search-input" />
+                            </div>
                         </div>
                     </div>
 
-                    <div class="tab-nav">
-                        <button 
-                            class="tab-btn" 
-                            :class="{ active: currentTab === 'admin' }" 
-                            @click="currentTab = 'admin'"
-                        >
-                            Admins
-                        </button>
-                        <button 
-                            class="tab-btn" 
-                            :class="{ active: currentTab === 'mod' }" 
-                            @click="currentTab = 'mod'"
-                        >
-                            Mods
-                        </button>
-                        <button 
-                            class="tab-btn" 
-                            :class="{ active: currentTab === 'management' }" 
-                            @click="currentTab = 'management'"
-                        >
-                            Management (Owners)
-                        </button>
-                    </div>
-                </div>
-
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th class="col-user">User</th>
-                                <th class="col-email">Email</th>
-                                <th class="col-pass">Password</th>
-                                <th class="col-actions">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(user, index) in filteredList" :key="index" class="data-row">
-                                <td class="col-user">
-                                    <div class="user-name" :style="user.username.toLowerCase() === 'anticroom' ? 'color: #A020F0;' : ''">
-                                        {{ user.username }}
-                                        <span v-if="user.username.toLowerCase() === 'anticroom'" style="font-size: 0.7em; opacity: 0.7;">(DEV)</span>
-                                    </div>
-                                </td>
-                                <td class="col-email">
-                                    <div class="credential-wrapper">
-                                        <div class="user-email" :class="{'masked-text': !user.showCredentials}">
-                                            {{ user.showCredentials ? user.email : '••••••••••••' }}
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-user">User</th>
+                                    <th class="col-email">Email</th>
+                                    <th class="col-pass">Password</th>
+                                    <th class="col-actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(user, index) in filteredList" :key="index" class="data-row">
+                                    <td class="col-user" data-label="User">
+                                        <div class="user-name" :style="user.username.toLowerCase() === 'anticroom' ? 'color: #A020F0;' : ''">
+                                            {{ user.username }}
+                                            <span v-if="user.username.toLowerCase() === 'anticroom'" style="font-size: 0.7em; opacity: 0.7;">(DEV)</span>
                                         </div>
-                                    </div>
-                                </td>
-                                <td class="col-pass">
-                                    <div class="credential-wrapper">
-                                        <div class="user-pass mono" :class="{'masked-text': !user.showCredentials}">
-                                            {{ user.showCredentials ? user.password : '••••••••' }}
+                                    </td>
+                                    <td class="col-email" data-label="Email">
+                                        <div class="credential-wrapper">
+                                            <div class="user-email" :class="{'masked-text': !user.showCredentials}">
+                                                {{ user.showCredentials ? user.email : '••••••••••••' }}
+                                            </div>
                                         </div>
-                                        <button class="btn-icon" @click="toggleVis(user)" :title="user.showCredentials ? 'Hide Credentials' : 'Show Credentials'">
-                                            {{ user.showCredentials ? '✕' : '👁' }}
-                                        </button>
-                                    </div>
-                                </td>
-                                <td class="col-actions">
-                                    <div class="action-group" v-if="user.username.toLowerCase() !== 'anticroom'">
-                                        <button class="btn-icon" @click="openEditModal(user)" title="Edit User">✎</button>
-                                        
-                                        <button 
-                                            v-if="isDeveloper"
-                                            class="btn-icon warn" 
-                                            @click="initiateRoleChange(user)" 
-                                            title="Change Role"
-                                        >
-                                            ⇄
-                                        </button>
+                                    </td>
+                                    <td class="col-pass" data-label="Password">
+                                        <div class="credential-wrapper">
+                                            <div class="user-pass mono" :class="{'masked-text': !user.showCredentials}">
+                                                {{ user.showCredentials ? user.password : '••••••••' }}
+                                            </div>
+                                            <button class="btn-icon" @click="toggleVis(user)" :title="user.showCredentials ? 'Hide Credentials' : 'Show Credentials'">
+                                                {{ user.showCredentials ? '✕' : '👁' }}
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td class="col-actions actions" data-label="Actions">
+                                        <div class="action-group" v-if="user.username.toLowerCase() !== 'anticroom'">
+                                            <button class="btn-icon" @click="openEditModal(user)" title="Edit User">✎</button>
+                                            
+                                            <button 
+                                                v-if="isDeveloper"
+                                                class="btn-icon warn" 
+                                                @click="initiateRoleChange(user)" 
+                                                title="Change Role"
+                                            >
+                                                ⇄
+                                            </button>
 
-                                        <button class="btn-icon danger" @click="removeUser(user)" title="Remove User">🗑</button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div v-if="filteredList.length === 0" class="empty-state">
-                        No users found in {{ currentTab }}.
+                                            <button class="btn-icon danger" @click="removeUser(user)" title="Remove User">🗑</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div v-if="filteredList.length === 0" class="empty-state">
+                            No users found in {{ currentTab }}.
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            </div>
 
-            <div v-if="editingUser" class="modal-backdrop" @click="closeEditModal">
-                <div class="modal-window" @click.stop>
+            <div v-if="editingUser" class="modal-overlay" @click="closeEditModal">
+                <div class="polished-modal" @click.stop>
                     <header class="modal-header">
                         <h3>Edit Credentials</h3>
                         <button class="close-modal" @click="closeEditModal">✕</button>
@@ -235,14 +260,14 @@ export default {
                 </div>
             </div>
 
-            <div v-if="roleChangeUser" class="modal-backdrop" @click="closeRoleModal">
-                <div class="modal-window" @click.stop>
+            <div v-if="roleChangeUser" class="modal-overlay" @click="closeRoleModal">
+                <div class="polished-modal" @click.stop>
                     <header class="modal-header">
                         <h3 style="color: #f59e0b;">⚠ Confirm Role Change</h3>
                         <button class="close-modal" @click="closeRoleModal">✕</button>
                     </header>
                     <div class="modal-body">
-                        <p style="font-size: 1.1rem; line-height: 1.5;">
+                        <p style="font-size: 1.1rem; line-height: 1.5; color: var(--color-on-background);">
                             Change role for <strong>{{ roleChangeUser.username }}</strong>:
                         </p>
                         <div style="margin-top: 15px; display: flex; gap: 10px; flex-direction: column;">
@@ -283,15 +308,15 @@ export default {
                 </div>
             </div>
 
-            <div v-if="showEditorsModal" class="modal-backdrop" @click="closeEditorsModal">
-                <div class="modal-window" style="max-width: 900px;" @click.stop>
+            <div v-if="showEditorsModal" class="modal-overlay" @click="closeEditorsModal">
+                <div class="polished-modal" style="max-width: 900px;" @click.stop>
                     <header class="modal-header">
                         <h3>Edit Listed Editors to show on the list</h3>
                         <button class="close-modal" @click="closeEditorsModal">✕</button>
                     </header>
                     <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">                        
                         <div class="editor-list-container">
-                            <div style="display: flex; gap: 10px; padding-bottom: 5px; border-bottom: 1px solid var(--color-border); font-weight: bold; color: var(--color-text-secondary); font-size: 0.8rem; margin-bottom: 10px;">
+                            <div class="editor-header-row desktop-only">
                                 <div style="width: 30px;"></div>
                                 <div style="flex: 1;">Name</div>
                                 <div style="flex: 2;">Channel Link</div>
@@ -307,21 +332,21 @@ export default {
                                 @dragstart="dragStartEditor($event, index)"
                                 @dragover.prevent
                                 @drop="dropEditor($event, index)"
-                                style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px; padding: 5px; background: rgba(255,255,255,0.02); border-radius: 4px;"
                             >
-                                <div style="width: 30px; cursor: grab; text-align: center; color: #666; font-size: 1.2rem; user-select: none;" title="Drag to reorder">
-                                    ::
-                                </div>
+                                <div class="drag-handle" title="Drag to reorder">::</div>
 
-                                <div style="flex: 1;">
+                                <div class="editor-col">
+                                    <label class="mobile-only">Name</label>
                                     <input v-model="editor.name" type="text" placeholder="Name" class="table-input" />
                                 </div>
 
-                                <div style="flex: 2;">
+                                <div class="editor-col" style="flex: 2;">
+                                    <label class="mobile-only">Channel Link</label>
                                     <input v-model="editor.link" type="text" placeholder="https://youtube.com/..." class="table-input" />
                                 </div>
 
-                                <div style="width: 120px;">
+                                <div class="editor-col" style="width: 120px;">
+                                    <label class="mobile-only">Role</label>
                                     <select v-model="editor.role" class="dropdown-select">
                                         <option value="owner">Owner</option>
                                         <option value="admin">Admin</option>
@@ -331,13 +356,13 @@ export default {
                                     </select>
                                 </div>
 
-                                <div style="width: 40px; text-align: center;">
+                                <div class="editor-actions">
                                     <button @click="removeEditorRow(index)" class="btn-icon danger" title="Remove" style="font-size: 1.2rem;">🗑</button>
                                 </div>
                             </div>
                         </div>
 
-                        <button @click="addEditorRow" class="btn-text" style="align-self: flex-start; margin-top: 15px; border: 1px dashed #555; padding: 8px 15px; border-radius: 4px;">+ Add New Editor</button>
+                        <button @click="addEditorRow" class="btn-add-staff" style="margin-top: 15px;">+ Add New Editor</button>
                     </div>
                     <footer class="modal-footer">
                         <p v-if="editorMessage" :class="editorError ? 'status-msg error' : 'status-msg success'">{{ editorMessage }}</p>
@@ -383,7 +408,9 @@ export default {
             isSavingEditors: false,
             editorMessage: '',
             editorError: false,
-            draggedEditorIndex: null
+            draggedEditorIndex: null,
+
+            isMobileSidebarOpen: false
         };
     },
     computed: {
@@ -397,6 +424,11 @@ export default {
             if (!this.searchQuery) return this.currentList;
             const query = this.searchQuery.toLowerCase();
             return this.currentList.filter(u => u.username.toLowerCase().includes(query) || u.email.toLowerCase().includes(query));
+        }
+    },
+    watch: {
+        currentTab() {
+            this.isMobileSidebarOpen = false;
         }
     },
     async mounted() {
@@ -436,9 +468,11 @@ export default {
                     width: 100%;
                     padding: 8px;
                     background: rgba(0,0,0,0.2);
-                    border-color: var(--color-primary);
-                    color: var(--color-text-main);
+                    border-color: var(--color-border);
+                    color: var(--color-on-background);
                     border-radius: 4px;
+                    font-family: inherit;
+                    transition: border-color 0.2s;
                 }
                 .table-input:focus {
                     outline: none;
@@ -478,7 +512,7 @@ export default {
     methods: {
         parseJwt(token) {
             try {
-                const base64Url = token.split('.')[1];
+                const base64Url = token.split('.');
                 const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
                 const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
                 return JSON.parse(jsonPayload);
@@ -565,6 +599,7 @@ export default {
                 this.sidebarMessage = 'User added & saved!';
                 this.formData = { username: '', email: '', password: '' };
                 this.showNewPassword = false;
+                this.isMobileSidebarOpen = false;
                 setTimeout(() => { this.sidebarMessage = '' }, 3000);
             } else {
                 this.sidebarMessage = 'Failed to save.'; this.sidebarError = true; await this.fetchUsers();
@@ -615,7 +650,7 @@ export default {
             if (success) { this.editMessage = 'Saved!'; setTimeout(() => { this.closeEditModal(); }, 1000); }
             else { this.editMessage = 'Failed.'; await this.fetchUsers(); }
         },
-        openEditorsModal() { this.showEditorsModal = true; this.editorMessage = ''; },
+        openEditorsModal() { this.showEditorsModal = true; this.editorMessage = ''; this.isMobileSidebarOpen = false; },
         closeEditorsModal() { this.showEditorsModal = false; this.editorMessage = ''; this.draggedEditorIndex = null; },
         addEditorRow() { this.editorsList.push({ name: '', link: '', role: 'helper' }); },
         removeEditorRow(index) { this.editorsList.splice(index, 1); },

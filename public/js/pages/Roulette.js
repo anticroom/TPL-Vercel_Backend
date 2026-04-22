@@ -13,7 +13,7 @@ export default {
         </main>
         <main v-else class="page-roulette">
             <div class="roulette-wrapper">
-                <div class="roulette-layout">
+                <div class="roulette-layout" :class="{ 'is-playing': isActive }">
                     
                     <aside class="roulette-controls">
                         <div class="control-card">
@@ -23,25 +23,52 @@ export default {
                             <div class="control-body">
                                 <form class="toggles">
                                     <div class="list-group">
-                                        <div class="check" v-if="hasMain">
-                                            <input type="checkbox" id="main_list" v-model="useMain">
-                                            <label for="main_list" class="type-label-lg">Main List (1-75)</label>
+                                        <div class="check">
+                                            <input type="checkbox" id="TPCL" v-model="useTPCL">
+                                            <label for="TPCL" class="type-label-lg">Include TPCL</label>
                                         </div>
-                                        <div class="check" v-if="hasExtended" style="margin-top: 10px;">
-                                            <input type="checkbox" id="extended_list" v-model="useExtended">
-                                            <label for="extended_list" class="type-label-lg">Extended List (76-150)</label>
+                                        <div class="sub-checks" v-if="useTPCL">
+                                            <div class="check" v-if="hasTPCLMain">
+                                                <input type="checkbox" id="TPCL_main" v-model="useTPCLMain">
+                                                <label for="TPCL_main" class="type-label-md">Main List (1-75)</label>
+                                            </div>
+                                            <div class="check" v-if="hasTPCLExtended">
+                                                <input type="checkbox" id="TPCL_ext" v-model="useTPCLExtended">
+                                                <label for="TPCL_ext" class="type-label-md">Extended List (76-150)</label>
+                                            </div>
+                                            <div class="check" v-if="hasTPCLLegacy">
+                                                <input type="checkbox" id="TPCL_leg" v-model="useTPCLLegacy">
+                                                <label for="TPCL_leg" class="type-label-md">Legacy List (>150)</label>
+                                            </div>
                                         </div>
-                                        <div class="check" v-if="hasLegacy" style="margin-top: 10px;">
-                                            <input type="checkbox" id="legacy_list" v-model="useLegacy">
-                                            <label for="legacy_list" class="type-label-lg">Legacy List (>150)</label>
+                                    </div>
+
+                                    <div class="list-group">
+                                        <div class="check">
+                                            <input type="checkbox" id="TPL" v-model="useTPL">
+                                            <label for="TPL" class="type-label-lg">Include TPL</label>
+                                        </div>
+                                        <div class="sub-checks" v-if="useTPL">
+                                            <div class="check" v-if="hasTPLMain">
+                                                <input type="checkbox" id="tpl_main" v-model="useTPLMain">
+                                                <label for="tpl_main" class="type-label-md">Main List (1-75)</label>
+                                            </div>
+                                            <div class="check" v-if="hasTPLExtended">
+                                                <input type="checkbox" id="tpl_ext" v-model="useTPLExtended">
+                                                <label for="tpl_ext" class="type-label-md">Extended List (76-150)</label>
+                                            </div>
+                                            <div class="check" v-if="hasTPLLegacy">
+                                                <input type="checkbox" id="tpl_leg" v-model="useTPLLegacy">
+                                                <label for="tpl_leg" class="type-label-md">Legacy List (>150)</label>
+                                            </div>
                                         </div>
                                     </div>
                                     
-                                    <Btn @click.native.prevent="onStart" class="btn-start" style="margin-top: 20px;">
+                                    <Btn @click.native.prevent="onStart" class="btn-start" style="margin-top: 8px;">
                                         {{ isActive ? 'Restart' : 'Start' }}
                                     </Btn>
                                 </form>
-                                <p class="type-label-md" style="color: #aaa; margin-top: 12px;">
+                                <p class="type-label-md" style="color: #aaa; margin-top: 12px; text-align: center;">
                                     The roulette saves automatically.
                                 </p>
                             </div>
@@ -69,6 +96,7 @@ export default {
                                     <h1 class="level-name type-headline-lg">{{ currentLevel.name }}</h1>
                                     <p class="type-label-md" style="opacity: 0.7; margin: 5px 0;">ID: {{ currentLevel.id }}</p>
                                     <p class="level-rank type-headline-sm">
+                                        <span class="type-label-sm" style="opacity: 0.8; margin-right: 5px;">{{ currentLevel.listType }}</span>
                                         <span :class="currentLevel.rank <= 150 ? 'goldhighlight' : ''" 
                                               :style="currentLevel.rank > 150 ? 'color: var(--color-text-legacy)' : ''">
                                             #{{ currentLevel.rank }}
@@ -85,7 +113,7 @@ export default {
                                         <input type="number" 
                                                v-model="percentage" 
                                                :placeholder="\`At least \${currentPercentage + 1}%\`" 
-                                               class="percent-input type-headline-sm"
+                                               class="percent-input"
                                                :min="currentPercentage + 1" 
                                                max="100"
                                                @keyup.enter="onDone">
@@ -111,7 +139,7 @@ export default {
                                         <span class="value type-headline-md">{{ currentPercentage }}%</span>
                                     </div>
                                 </div>
-                                <Btn v-if="currentPercentage < 99 && !hasCompleted" @click.native.prevent="showRemaining = !showRemaining" style="margin-top: 20px;">
+                                <Btn v-if="currentPercentage < 99 && !hasCompleted" @click.native.prevent="showRemaining = !showRemaining" style="margin-top: 24px; width: 100%;">
                                     {{ showRemaining ? 'Hide remaining levels' : 'Show remaining levels' }}
                                 </Btn>
                             </div>
@@ -131,7 +159,7 @@ export default {
                                         <span class="rank-tag type-label-sm" 
                                               :class="level.rank <= 150 ? 'goldhighlight' : ''"
                                               :style="level.rank > 150 ? 'color: var(--color-text-legacy)' : ''">
-                                            #{{ level.rank }}
+                                            {{ level.listType }} #{{ level.rank }}
                                         </span>
                                         <strong class="type-label-lg">
                                             {{ level.name }} 
@@ -149,14 +177,14 @@ export default {
                                         <span class="rank-tag type-label-sm"
                                               :class="level.rank <= 150 ? 'goldhighlight' : ''"
                                               :style="level.rank > 150 ? 'color: var(--color-text-legacy)' : ''">
-                                            #{{ level.rank }}
+                                            {{ level.listType }} #{{ level.rank }}
                                         </span>
                                         <strong class="type-label-lg">
                                             {{ level.name }}
                                             <span style="font-size:0.7em; font-weight:normal; opacity:0.7;">{{ level.id }}</span>
                                         </strong>
                                     </div>
-                                    <div class="level-percent type-label-lg" style="color: #2ecc71">{{ progression[progression.length - 1 - i] }}%</div>
+                                    <div class="level-percent type-label-lg">{{ progression[progression.length - 1 - i] }}%</div>
                                 </div>
                             </div>
                         </div>
@@ -175,7 +203,8 @@ export default {
     data: () => ({
         loading: true, 
         
-        listLevels: [],
+        TPCLLevels: [],
+        TPLLevels: [],
 
         levels: [],
         progression: [],
@@ -183,44 +212,67 @@ export default {
         givenUp: false,
         showRemaining: false,
         
-        useMain: true,
-        useExtended: true,
-        useLegacy: true,
+        useTPL: true,
+        useTPL: false,
+
+        useTPCLMain: true,
+        useTPCLExtended: true,
+        useTPCLLegacy: true,
+
+        useTPLMain: true,
+        useTPLExtended: true,
+        useTPLLegacy: true,
 
         toasts: [],
         fileInput: undefined,
         store
     }),
     async mounted() {
-        const style = document.createElement('style');
-        style.textContent = `
-            .check { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-            .check input { width: 16px; height: 16px; cursor: pointer; }
-            .check label { margin-bottom: 0; cursor: pointer; user-select: none; }
-        `;
-        document.head.appendChild(style);
-
         this.fileInput = document.createElement('input');
         this.fileInput.type = 'file';
         this.fileInput.multiple = false;
         this.fileInput.accept = '.json';
         this.fileInput.addEventListener('change', this.onImportUpload);
 
-        const listData = await fetchList();
+        const [TPCLData, TPLData] = await Promise.all([
+            fetchList('TPCL'),
+            fetchList('TPL')
+        ]);
 
-        if (listData) {
-            this.listLevels = listData.map(([lvl], index) => {
+        if (TPCLData) {
+            this.TPCLLevels = TPCLData.map(([lvl], index) => {
                 if (!lvl) return null;
                 return {
                     ...lvl,
+                    listType: 'TPCL',
                     rank: index + 1,
                     video: lvl.verification || lvl.video
                 };
             }).filter(l => l);
         }
 
-        if (this.listLevels.length === 0) {
+        if (TPLData) {
+            this.TPLLevels = TPLData.map(([lvl], index) => {
+                if (!lvl) return null;
+                return {
+                    ...lvl,
+                    listType: 'TPL',
+                    rank: index + 1,
+                    video: lvl.verification || lvl.video
+                };
+            }).filter(l => l);
+        }
+
+        if (this.TPCLLevels.length === 0 && this.TPLLevels.length === 0) {
             this.showToast('Warning: Failed to load levels.');
+        }
+        
+        if (this.store.listType === 'TPL') {
+            this.useTPCL = false;
+            this.useTPL = true;
+        } else {
+            this.useTPCL = true;
+            this.useTPL = false;
         }
 
         this.loading = false;
@@ -232,9 +284,13 @@ export default {
         }
     },
     computed: {
-        hasMain() { return this.listLevels.some(l => l.rank <= 75); },
-        hasExtended() { return this.listLevels.some(l => l.rank > 75 && l.rank <= 150); },
-        hasLegacy() { return this.listLevels.some(l => l.rank > 150); },
+        hasTPCLMain() { return this.TPCLLevels.some(l => l.rank <= 75); },
+        hasTPCLExtended() { return this.TPCLLevels.some(l => l.rank > 75 && l.rank <= 150); },
+        hasTPCLLegacy() { return this.TPCLLevels.some(l => l.rank > 150); },
+
+        hasTPLMain() { return this.TPLLevels.some(l => l.rank <= 75); },
+        hasTPLExtended() { return this.TPLLevels.some(l => l.rank > 75 && l.rank <= 150); },
+        hasTPLLegacy() { return this.TPLLevels.some(l => l.rank > 150); },
 
         currentLevel() {
             return this.levels[this.progression.length];
@@ -264,16 +320,30 @@ export default {
                 if (!confirm('Give up and restart?')) return;
             }
 
-            if (!this.useMain && !this.useExtended && !this.useLegacy) {
-                this.showToast('Please select at least one list section.');
+            if (!this.useTPCL && !this.useTPL) {
+                this.showToast('Please select at least one list.');
                 return;
             }
 
-            const pool = this.listLevels.filter(l => {
-                if (l.rank <= 75) return this.useMain;
-                if (l.rank <= 150) return this.useExtended;
-                return this.useLegacy;
-            });
+            const pool = [];
+
+            if (this.useTPCL) {
+                const TPCLSubset = this.TPCLLevels.filter(l => {
+                    if (l.rank <= 75) return this.useTPCLMain;
+                    if (l.rank <= 150) return this.useTPCLExtended;
+                    return this.useTPCLLegacy;
+                });
+                pool.push(...TPCLSubset);
+            }
+
+            if (this.useTPL) {
+                const TPLSubset = this.TPLLevels.filter(l => {
+                    if (l.rank <= 75) return this.useTPLMain;
+                    if (l.rank <= 150) return this.useTPLExtended;
+                    return this.useTPLLegacy;
+                });
+                pool.push(...TPLSubset);
+            }
 
             if (pool.length === 0) {
                 this.showToast('No levels matching your criteria.');
@@ -313,7 +383,7 @@ export default {
         },
         async onImportUpload() {
             if (this.fileInput.files.length === 0) return;
-            const file = this.fileInput.files[0];
+            const file = this.fileInput.files;
             try {
                 const roulette = JSON.parse(await file.text());
                 this.levels = roulette.levels;
@@ -330,7 +400,7 @@ export default {
             const file = new Blob([JSON.stringify({ levels: this.levels, progression: this.progression })], { type: 'application/json' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(file);
-            a.download = 'tpl_roulette.json';
+            a.download = `roulette-${new Date().toISOString().slice(0, 10)}.json`;
             a.click();
             URL.revokeObjectURL(a.href);
         },

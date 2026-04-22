@@ -12,10 +12,11 @@ export default {
                 levelName: '',
                 username: '',
                 percent: '',
-                hz: '240',
+                hz: '',
                 discord: '',
                 videoLink: '',
-                notes: ''
+                notes: '',
+                listType: ''
             },
             levelFormData: {
                 name: '',
@@ -28,30 +29,37 @@ export default {
                 notes: ''
             },
             turnstileToken: null,
-            turnstileWidgetId: null, 
+            turnstileWidgetId: null,
             turnstileError: '',
             isSubmitting: false,
             successMessage: '',
             errorMessage: '',
-            submissions: [],
-            loading: false,
-            isProcessing: false,
-            userRole: null,
-            editingSubmission: null,
-            denyingSubmission: null,
-            denyReason: '',
-            viewMode: false,
             levels: [],
             levelSearchInput: '',
-            minPercent: 0
+            minPercent: 0,
+            isLoadingLevels: false,
+            isSidebarOpen: false,
+            isLoadingSidebar: false,
+            sidebarSubmissions: [],
+            expandedSubmissions: [],
+            currentPage: 1,
+            totalPages: 1,
+
+            sidebarSearch: '',
+            sidebarStatus: 'all'
         };
     },
     computed: {
         filteredLevels() {
             const search = this.levelSearchInput.toLowerCase();
-            if (!search) return this.levels.slice(0, 50);
+            
+            if (!search) return this.levels;
+
             return this.levels.filter(level =>
-                level[0] && level[0].name && level[0].name.toLowerCase().includes(search)
+                level && 
+                level[0] && 
+                level[0].name && 
+                level[0].name.toLowerCase().includes(search)
             );
         }
     },
@@ -60,42 +68,70 @@ export default {
             if (window.turnstile && this.turnstileWidgetId !== null) {
                 try {
                     window.turnstile.remove(this.turnstileWidgetId);
-                } catch (e) {}
+                } catch (e) { }
             }
             this.turnstileError = '';
             this.renderTurnstile();
+
+            this.sidebarSearch = '';
+            this.sidebarStatus = 'all';
+            this.currentPage = 1;
+            this.expandedSubmissions = [];
+            this.sidebarSubmissions = [];
+            if (this.isSidebarOpen) this.fetchSidebarSubmissions();
+        },
+        'store.listType': async function () {
+            this.levelSearchInput = '';
+            this.levels = [];
+            this.formData.levelName = '';
+            this.formData.percent = '';
+            this.formData.hz = '';
+            this.formData.videoLink = '';
+            this.formData.notes = '';
+            this.successMessage = '';
+            this.errorMessage = '';
+
+            await this.loadLevels();
+
+            this.sidebarSearch = '';
+            this.sidebarStatus = 'all';
+            this.currentPage = 1;
+            this.expandedSubmissions = [];
+            this.sidebarSubmissions = [];
+            if (this.isSidebarOpen) this.fetchSidebarSubmissions();
         }
     },
     template: `
         <main class="page-submit">
             <div class="submit-container">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <div>
+                <div class="submit-header-top">
+                    <div class="submit-header-left">
                         <h1 class="type-headline-lg">Submit to the List</h1>
-                        <p class="type-body submit-intro" style="margin-top: 15px;">
+                        <p class="type-body submit-intro">
                             Choose what you'd like to submit: a record on an existing level or a brand new level to be added to the list.
                         </p>
+                        <button @click="toggleSidebar" class="btn-view-history">
+                            <i class="fa-solid fa-file-lines"></i> View Submissions
+                        </button>
                     </div>
-                    <div class="submit-type-toggle" style="display: flex; gap: 1rem; flex-shrink: 0;">
+                    <div class="submit-type-toggle">
                         <button @click="submissionType = 'record'" 
                                 :class="{ active: submissionType === 'record' }"
-                                style="padding: 0.75rem 1.5rem; border: 2px solid var(--color-border); border-radius: 0.5rem; background: none; color: var(--color-text); cursor: pointer; font-size: 1rem; font-weight: 500; transition: all 0.2s; white-space: nowrap;"
-                                :style="submissionType === 'record' ? { background: 'var(--color-primary)', borderColor: 'var(--color-primary)', color: 'var(--color-background)' } : {}">
+                                class="type-toggle-btn">
                             Submit Records
                         </button>
                         <button @click="submissionType = 'level'" 
                                 :class="{ active: submissionType === 'level' }"
-                                style="padding: 0.75rem 1.5rem; border: 2px solid var(--color-border); border-radius: 0.5rem; background: none; color: var(--color-text); cursor: pointer; font-size: 1rem; font-weight: 500; transition: all 0.2s; white-space: nowrap;"
-                                :style="submissionType === 'level' ? { background: 'var(--color-primary)', borderColor: 'var(--color-primary)', color: 'var(--color-background)' } : {}">
+                                class="type-toggle-btn">
                             Submit Levels
                         </button>
                     </div>
                 </div>
 
                 <div class="submit-content">
-                    <div class="submit-section" v-if="!viewMode && submissionType === 'record'">
+                    <div class="submit-section" v-if="submissionType === 'record'">
                         <h2 class="type-headline-md">Submit a Record</h2>
-                        <p class="type-body submit-intro" style="margin-top: 15px; opacity: 0.8;">
+                        <p class="type-body submit-intro sub-text">
                             Complete the form below to submit your verified record. Staff will review and approve or deny your submission but PLEASE make sure to put your username exactly as it is with your other records or it'll treat it like another user!
                         </p>
                         <form @submit.prevent="submitRecord" class="submit-form">
@@ -110,20 +146,26 @@ export default {
                                         aria-controls="level-listbox"
                                     />
                                     <div v-if="formData.levelName" class="level-selected type-label-md">
-                                        ✓ Selected: {{ formData.levelName }}
+                                        <i class="fa-solid fa-check" style="margin-right: 5px;"></i> Selected: {{ formData.levelName }}
                                     </div>
                                 </div>
+                                
+                                <div class="level-list" id="level-listbox" role="listbox">
+                                    <template v-if="isLoadingLevels">
+                                        <div v-for="i in 6" :key="'skel-' + i" class="level-item" style="cursor: default;">
+                                            <div class="skeleton skel-text"></div>
+                                            <div class="skeleton skel-text skel-text-short" style="opacity: 0.5;"></div>
+                                        </div>
+                                    </template>
 
-                                <div class="level-list-column">
-                                    <label class="type-label-lg">Select from list:</label>
-                                    <div class="level-list" id="level-listbox" role="listbox">
+                                    <template v-else>
                                         <div v-if="filteredLevels.length === 0" class="no-results type-label-md">
-                                            No levels found
+                                            No levels found! If this is incorrect, please ping Anticroom about this issue! Sorry D:
                                         </div>
                                         <div 
                                             v-for="(level, index) in filteredLevels" 
-                                            :key="'list-' + (level[0]?.id || level[0]?._id || '') + '-' + index"
-                                            @click="selectLevel(level[0])"
+                                            :key="store.listType + '-' + (level[0]?.id || level[0]?._id || '') + '-' + index"
+                                            @click="selectLevel(level)"
                                             :class="{ active: formData.levelName === level[0]?.name }"
                                             class="level-item type-label-md"
                                             role="option"
@@ -131,7 +173,7 @@ export default {
                                             <div class="level-item-name">{{ level[0]?.name }}</div>
                                             <div class="level-item-author">{{ level[0]?.author }}</div>
                                         </div>
-                                    </div>
+                                    </template>
                                 </div>
                             </div>
 
@@ -172,28 +214,35 @@ export default {
 
                             <div class="captcha-container">
                                 <div id="turnstile-record"></div>
-                                <div v-if="turnstileError" class="error-text" style="color: #ff4444; margin-top: 5px; font-weight: bold;">{{ turnstileError }}</div>
+                                <div v-if="turnstileError" class="error-text" style="color: #ff4444; margin-top: 5px; font-weight: bold;">
+                                    <i class="fa-solid fa-triangle-exclamation"></i> {{ turnstileError }}
+                                </div>
                             </div>
 
                             <button type="submit" class="btn-submit-record" :disabled="isSubmitting">
+                                <i v-if="isSubmitting" class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i>
                                 {{ isSubmitting ? 'Submitting...' : 'Submit Record' }}
                             </button>
 
-                            <div v-if="successMessage" class="success-message">✓ {{ successMessage }}</div>
-                            <div v-if="errorMessage" class="error-message">✗ {{ errorMessage }}</div>
+                            <div v-if="successMessage" class="success-message">
+                                <i class="fa-solid fa-check-circle"></i> {{ successMessage }}
+                            </div>
+                            <div v-if="errorMessage" class="error-message">
+                                <i class="fa-solid fa-circle-xmark"></i> {{ errorMessage }}
+                            </div>
                         </form>
                     </div>
 
-                    <div class="submit-section" v-if="!viewMode && submissionType === 'level'">
+                    <div class="submit-section" v-if="submissionType === 'level'">
                         <h2 class="type-headline-md">Submit a New Level</h2>
-                        <p class="type-body submit-intro" style="margin-top: 15px; opacity: 0.8;">
+                        <p class="type-body submit-intro sub-text">
                             Have a level you verified that you want placed? Submit them here and we'll accept them in time!
                         </p>
                         <form @submit.prevent="submitLevel" class="submit-form">
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="type-label-lg">Level Name *</label>
-                                    <input v-model="levelFormData.name" type="text" class="type-label-lg" placeholder="e.g. Bloodbath" required />
+                                    <input v-model="levelFormData.name" type="text" class="type-label-lg" placeholder="Denoue..." required />
                                 </div>
                                 <div class="form-group">
                                     <label class="type-label-lg">Level ID *</label>
@@ -235,145 +284,132 @@ export default {
 
                             <div class="captcha-container">
                                 <div id="turnstile-level"></div>
-                                <div v-if="turnstileError" class="error-text" style="color: #ff4444; margin-top: 5px; font-weight: bold;">{{ turnstileError }}</div>
+                                <div v-if="turnstileError" class="error-text" style="color: #ff4444; margin-top: 5px; font-weight: bold;">
+                                    <i class="fa-solid fa-triangle-exclamation"></i> {{ turnstileError }}
+                                </div>
                             </div>
 
                             <button type="submit" class="btn-submit-record" :disabled="isSubmitting">
+                                <i v-if="isSubmitting" class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i>
                                 {{ isSubmitting ? 'Submitting...' : 'Submit Level' }}
                             </button>
 
-                            <div v-if="successMessage" class="success-message">✓ {{ successMessage }}</div>
-                            <div v-if="errorMessage" class="error-message">✗ {{ errorMessage }}</div>
+                            <div v-if="successMessage" class="success-message">
+                                <i class="fa-solid fa-check-circle"></i> {{ successMessage }}
+                            </div>
+                            <div v-if="errorMessage" class="error-message">
+                                <i class="fa-solid fa-circle-xmark"></i> {{ errorMessage }}
+                            </div>
                         </form>
                     </div>
+                </div>
 
-                    <div class="submit-section" v-if="userRole && !viewMode" style="margin-top: 3rem; border-top: 2px solid var(--color-border); padding-top: 2rem;">
-                        <h2 class="type-headline-md">Staff Review Panel</h2>
-                        <p class="staff-info type-label-md">{{ userRole === 'admin' ? 'Admin' : 'Mod' }} - Review pending submissions</p>
+                <div class="sidebar-overlay" v-if="isSidebarOpen" @click="toggleSidebar"></div>
+                <aside class="submissions-sidebar" :class="{ 'is-open': isSidebarOpen }">
+                    <div class="sidebar-header">
+                        <div>
+                            <h3 class="type-headline-sm">Submission History</h3>
+                            <p class="type-label-sm" style="opacity:0.7; margin-top:0.25rem;">
+                                {{ store.listType }} - {{ submissionType === 'record' ? 'Records' : 'Levels' }}
+                            </p>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn-icon-sidebar" @click="refreshSidebar" :disabled="isLoadingSidebar" title="Refresh list">
+                                <i class="fa-solid fa-rotate-right" :class="{'fa-spin': isLoadingSidebar}"></i>
+                            </button>
+                            <button class="btn-icon-sidebar" @click="toggleSidebar" title="Close sidebar">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </div>
 
-                        <div v-if="loading" class="loading-spinner">
+                    <div class="sidebar-filters">
+                        <input v-model="sidebarSearch" type="text" placeholder="Search user or level..." class="sidebar-search-input" @keyup.enter="applySidebarFilters" />
+                        <select v-model="sidebarStatus" class="sidebar-status-select">
+                            <option value="all">All Statuses</option>
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="denied">Denied</option>
+                        </select>
+                        <button @click="applySidebarFilters" class="btn-sidebar-search">Search</button>
+                    </div>
+                    
+                    <div class="sidebar-content">
+                        <div v-if="isLoadingSidebar" class="loading-spinner">
                             <Spinner></Spinner>
                         </div>
-
-                        <div v-else-if="submissions.length === 0" class="no-submissions type-body">
-                            <p>No pending submissions at the moment.</p>
+                        <div v-else-if="sidebarSubmissions.length === 0" class="no-submissions type-body">
+                            <p>No submissions found.</p>
                         </div>
-
-                        <div v-else class="submissions-list">
-                            <div v-for="submission in submissions" :key="submission.id" class="submission-card">
-                                <div class="submission-header">
-                                    <div>
-                                        <h3 class="type-headline-sm">{{ submission.levelName || submission.name }}</h3>
-                                        <p class="submission-meta type-label-sm">Submitted by {{ submission.username || submission.author }} • {{ formatDate(submission.created_at) }}</p>
+                        <div v-else class="sidebar-table-container">
+                            <div class="sidebar-table-header type-label-sm">
+                                <div class="col-level">Level</div>
+                                <div class="col-user">{{ submissionType === 'record' ? 'Player' : 'Creator' }}</div>
+                                <div class="col-video">Link</div>
+                                <div class="col-status">Status</div>
+                                <div class="col-toggle"></div>
+                            </div>
+                            
+                            <div class="sidebar-table-body">
+                                <div v-for="sub in sidebarSubmissions" :key="sub.id" class="sidebar-row-group">
+                                    <div class="sidebar-row-main" @click="toggleExpand(sub.id)">
+                                        <div class="col-level" :title="submissionType === 'record' ? sub.level_name : sub.name">
+                                            {{ submissionType === 'record' ? sub.level_name : sub.name }}
+                                        </div>
+                                        <div class="col-user" :title="submissionType === 'record' ? sub.username : sub.author">
+                                            {{ submissionType === 'record' ? sub.username : sub.author }}
+                                        </div>
+                                        <div class="col-video">
+                                            <a v-if="submissionType === 'record' ? sub.video_link : sub.verification" 
+                                               :href="submissionType === 'record' ? sub.video_link : sub.verification" 
+                                               target="_blank" @click.stop title="Watch Video" class="video-hyperlink">
+                                               <i class="fa-solid fa-play"></i>
+                                            </a>
+                                        </div>
+                                        <div class="col-status">
+                                            <span class="status-indicator" :class="sub.status.toLowerCase()" :title="sub.status"></span>
+                                        </div>
+                                        <div class="col-toggle" :class="{ 'is-expanded': expandedSubmissions.includes(sub.id) }">
+                                            <i class="fa-solid fa-chevron-down"></i>
+                                        </div>
                                     </div>
-                                    <div class="submission-actions">
-                                        <button @click="editSubmission(submission)" class="btn-edit type-label-sm">✎ Edit</button>
-                                        <button @click="approveSubmission(submission.id)" class="btn-approve type-label-sm" :disabled="isProcessing">✓ Approve</button>
-                                        <button @click="denySubmission(submission)" class="btn-deny type-label-sm" :disabled="isProcessing">✗ Deny</button>
-                                    </div>
-                                </div>
-
-                                <div class="submission-details">
-                                    <div class="detail-row">
-                                        <span class="label type-label-md">Username:</span>
-                                        <span class="value type-label-md">{{ submission.username }}</span>
-                                    </div>
-                                    <div class="detail-row">
-                                        <span class="label type-label-md">Percent:</span>
-                                        <span class="value type-label-md">{{ submission.percent }}%</span>
-                                    </div>
-                                    <div class="detail-row" v-if="submission.hz">
-                                        <span class="label type-label-md">FPS/Hz:</span>
-                                        <span class="value type-label-md">{{ submission.hz }}</span>
-                                    </div>
-                                    <div class="detail-row">
-                                        <span class="label type-label-md">Discord:</span>
-                                        <span class="value type-label-md">{{ submission.discord }}</span>
-                                    </div>
-                                    <div class="detail-row">
-                                        <span class="label type-label-md">Video:</span>
-                                        <a :href="submission.video_link" target="_blank" class="video-link">{{ submission.video_link }}</a>
-                                    </div>
-                                    <div class="detail-row" v-if="submission.notes">
-                                        <span class="label type-label-md">Notes:</span>
-                                        <span class="value type-label-md">{{ submission.notes }}</span>
+                                    
+                                    <div v-if="expandedSubmissions.includes(sub.id)" class="sidebar-row-details">
+                                        <div v-if="submissionType === 'record'" class="detail-grid">
+                                            <div><strong>Percent:</strong> {{ sub.percent }}%</div>
+                                            <div><strong>FPS/Hz:</strong> {{ sub.hz || 'N/A' }}</div>
+                                            <div><strong>Date:</strong> {{ formatDate(sub.created_at) }}</div>
+                                            <div><strong>Status:</strong> <span style="text-transform: capitalize;">{{ sub.status }}</span></div>
+                                            <div v-if="sub.notes" class="full-width-cell"><strong>Notes:</strong> {{ sub.notes }}</div>
+                                        </div>
+                                        
+                                        <div v-if="submissionType === 'level'" class="detail-grid">
+                                            <div><strong>ID:</strong> {{ sub.id_gd || 'N/A' }}</div>
+                                            <div><strong>Verifier:</strong> {{ sub.verifier || 'N/A' }}</div>
+                                            <div><strong>Placement:</strong> {{ sub.placement_suggestion || 'N/A' }}</div>
+                                            <div><strong>Date:</strong> {{ formatDate(sub.created_at) }}</div>
+                                            <div v-if="sub.notes" class="full-width-cell"><strong>Notes:</strong> {{ sub.notes }}</div>
+                                        </div>
+                                        
+                                        <div v-if="sub.status === 'denied' && sub.denial_reason" class="denial-reason-box full-width-cell">
+                                            <strong>Denial Reason:</strong> {{ sub.denial_reason }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div v-if="editingSubmission" class="modal-overlay" @click.self="editingSubmission = null">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h2 class="type-headline-md">Edit Submission</h2>
-                            <button class="btn-close" @click="editingSubmission = null">✕</button>
-                        </div>
-                        
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label class="type-label-lg">Level Name</label>
-                                <input v-model="editingSubmission.levelName" type="text" />
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="type-label-lg">Username</label>
-                                    <input v-model="editingSubmission.username" type="text" />
-                                </div>
-                                <div class="form-group">
-                                    <label class="type-label-lg">Percent</label>
-                                    <input v-model.number="editingSubmission.percent" type="number" min="0" max="100" />
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="type-label-lg">FPS/Hz</label>
-                                    <input v-model.number="editingSubmission.hz" type="number" />
-                                </div>
-                                <div class="form-group">
-                                    <label class="type-label-lg">Discord</label>
-                                    <input v-model="editingSubmission.discord" type="text" />
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="type-label-lg">Video Link</label>
-                                <input v-model="editingSubmission.videoLink" type="url" />
-                            </div>
-                            <div class="form-group">
-                                <label class="type-label-lg">Notes</label>
-                                <textarea v-model="editingSubmission.notes" rows="4"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="modal-footer">
-                            <button @click="editingSubmission = null" class="btn-cancel">Cancel</button>
-                            <button @click="saveEditedSubmission" class="btn-save" :disabled="isProcessing">Save Changes</button>
-                        </div>
+                    <div class="sidebar-footer">
+                        <button @click="prevPage" :disabled="currentPage === 1 || isLoadingSidebar" class="btn-page">
+                            <i class="fa-solid fa-arrow-left"></i> Prev
+                        </button>
+                        <span class="type-label-md">Page {{ currentPage }} of {{ totalPages }}</span>
+                        <button @click="nextPage" :disabled="currentPage >= totalPages || isLoadingSidebar" class="btn-page">
+                            Next <i class="fa-solid fa-arrow-right"></i>
+                        </button>
                     </div>
-                </div>
-
-                <div v-if="denyingSubmission" class="modal-overlay" @click.self="denyingSubmission = null">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h2 class="type-headline-md">Deny Submission</h2>
-                            <button class="btn-close" @click="denyingSubmission = null">✕</button>
-                        </div>
-                        
-                        <div class="modal-body">
-                            <p class="type-body">Are you sure you want to deny this submission?</p>
-                            <div class="form-group">
-                                <label class="type-label-lg">Reason for denial (optional)</label>
-                                <textarea v-model="denyReason" placeholder="Explain why this submission is being denied..." rows="4"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="modal-footer">
-                            <button @click="denyingSubmission = null" class="btn-cancel">Cancel</button>
-                            <button @click="confirmDeny" class="btn-deny" :disabled="isProcessing">Confirm Deny</button>
-                        </div>
-                    </div>
-                </div>
+                </aside>
             </div>
         </main>
     `,
@@ -391,8 +427,8 @@ export default {
                 const el = document.querySelector(targetId);
 
                 if (el) {
-                    el.innerHTML = ''; 
-                    this.turnstileWidgetId = window.turnstile.render(targetId, {
+                    el.innerHTML = '';
+                    this.turnstileWidgetId = window.turnstile.render(el, {
                         sitekey: SITEKEY,
                         theme: 'dark',
                         callback: (token) => {
@@ -414,8 +450,8 @@ export default {
             });
         },
         selectLevel(level) {
-            this.formData.levelName = level.name;
-            this.minPercent = level.percentToQualify || 0;
+            this.formData.levelName = level[0]?.name;
+            this.minPercent = level[0]?.percentToQualify || 0;
             this.formData.percent = this.minPercent;
         },
         getTurnstileToken() {
@@ -440,7 +476,7 @@ export default {
         },
         async submitRecord() {
             this.turnstileError = '';
-            
+
             const turnstileToken = await this.getTurnstileToken();
             if (!turnstileToken) return;
 
@@ -451,6 +487,7 @@ export default {
             try {
                 const submissionData = {
                     ...this.formData,
+                    listType: this.store.listType,
                     turnstileToken
                 };
 
@@ -474,23 +511,31 @@ export default {
                     hz: '',
                     discord: '',
                     videoLink: '',
-                    notes: ''
+                    notes: '',
+                    listType: ''
                 };
                 this.levelSearchInput = '';
-                
+
                 if (window.turnstile && this.turnstileWidgetId !== null) {
                     window.turnstile.reset(this.turnstileWidgetId);
                     this.turnstileToken = null;
                 }
+
+                if (this.isSidebarOpen) this.refreshSidebar();
             } catch (error) {
                 this.errorMessage = error.message;
+
+                if (window.turnstile && this.turnstileWidgetId !== null) {
+                    window.turnstile.reset(this.turnstileWidgetId);
+                    this.turnstileToken = null;
+                }
             } finally {
                 this.isSubmitting = false;
             }
         },
         async submitLevel() {
             this.turnstileError = '';
-            
+
             const turnstileToken = await this.getTurnstileToken();
             if (!turnstileToken) return;
 
@@ -501,7 +546,15 @@ export default {
             try {
                 const submissionData = {
                     submission_type: 'level',
-                    ...this.levelFormData,
+                    name: this.levelFormData.name,
+                    id: String(this.levelFormData.id),
+                    author: this.levelFormData.author,
+                    verifier: this.levelFormData.verifier,
+                    verification: this.levelFormData.verification,
+                    percentToQualify: this.levelFormData.percentToQualify,
+                    placementSuggestion: this.levelFormData.placementSuggestion,
+                    notes: this.levelFormData.notes,
+                    listType: this.store.listType,
                     turnstileToken
                 };
 
@@ -528,135 +581,95 @@ export default {
                     placementSuggestion: '',
                     notes: ''
                 };
-                
+
                 if (window.turnstile && this.turnstileWidgetId !== null) {
                     window.turnstile.reset(this.turnstileWidgetId);
                     this.turnstileToken = null;
                 }
+
+                if (this.isSidebarOpen) this.refreshSidebar();
             } catch (error) {
                 this.errorMessage = error.message;
+                if (window.turnstile && this.turnstileWidgetId !== null) {
+                    window.turnstile.reset(this.turnstileWidgetId);
+                    this.turnstileToken = null;
+                }
             } finally {
                 this.isSubmitting = false;
             }
         },
-        async loadSubmissions() {
-            this.loading = true;
+        toggleSidebar() {
+            this.isSidebarOpen = !this.isSidebarOpen;
+            if (this.isSidebarOpen && this.sidebarSubmissions.length === 0) {
+                this.fetchSidebarSubmissions();
+            }
+        },
+        applySidebarFilters() {
+            this.currentPage = 1;
+            this.expandedSubmissions = [];
+            this.fetchSidebarSubmissions();
+        },
+        refreshSidebar() {
+            this.currentPage = 1;
+            this.expandedSubmissions = [];
+            this.fetchSidebarSubmissions();
+        },
+        toggleExpand(id) {
+            const index = this.expandedSubmissions.indexOf(id);
+            if (index > -1) {
+                this.expandedSubmissions.splice(index, 1);
+            } else {
+                this.expandedSubmissions.push(id);
+            }
+        },
+        async fetchSidebarSubmissions() {
+            this.isLoadingSidebar = true;
             try {
-                const token = localStorage.getItem('admin_token');
-                const response = await fetch(`/api/update-records?action=view`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const response = await fetch(`/api/update-records?action=public-view&listType=${this.store.listType}&type=${this.submissionType}&page=${this.currentPage}&limit=50&search=${encodeURIComponent(this.sidebarSearch)}&status=${encodeURIComponent(this.sidebarStatus)}`);
 
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        this.userRole = null;
-                        return;
-                    }
-                    throw new Error('Failed to load submissions');
-                }
+                if (!response.ok) throw new Error('Failed to load history');
 
                 const data = await response.json();
-                this.submissions = data.submissions || [];
-                this.userRole = data.userRole;
+                this.sidebarSubmissions = data.submissions || [];
+                this.totalPages = data.totalPages || 1;
             } catch (error) {
-                console.error('Error loading submissions:', error);
+                console.error('Error loading sidebar submissions:', error);
+                this.sidebarSubmissions = [];
             } finally {
-                this.loading = false;
+                this.isLoadingSidebar = false;
             }
         },
-        async approveSubmission(id) {
-            this.isProcessing = true;
-            try {
-                const token = localStorage.getItem('admin_token');
-                const response = await fetch('/api/update-records?action=process', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ id, action: 'approve' })
-                });
-
-                if (!response.ok) throw new Error('Failed to approve submission');
-
-                await this.loadSubmissions();
-            } catch (error) {
-                alert('Error approving submission: ' + error.message);
-            } finally {
-                this.isProcessing = false;
+        nextPage() {
+            if (this.currentPage < this.totalPages) {
+                this.currentPage++;
+                this.expandedSubmissions = [];
+                this.fetchSidebarSubmissions();
             }
         },
-        denySubmission(submission) {
-            this.denyingSubmission = submission;
-            this.denyReason = '';
-        },
-        async confirmDeny() {
-            if (!this.denyingSubmission) return;
-
-            this.isProcessing = true;
-            try {
-                const token = localStorage.getItem('admin_token');
-                const response = await fetch('/api/update-records?action=process', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        id: this.denyingSubmission.id,
-                        action: 'deny',
-                        reason: this.denyReason
-                    })
-                });
-
-                if (!response.ok) throw new Error('Failed to deny submission');
-
-                this.denyingSubmission = null;
-                this.denyReason = '';
-                await this.loadSubmissions();
-            } catch (error) {
-                alert('Error denying submission: ' + error.message);
-            } finally {
-                this.isProcessing = false;
-            }
-        },
-        editSubmission(submission) {
-            this.editingSubmission = { ...submission };
-        },
-        async saveEditedSubmission() {
-            if (!this.editingSubmission) return;
-
-            this.isProcessing = true;
-            try {
-                const token = localStorage.getItem('admin_token');
-                const response = await fetch('/api/update-records?action=edit-submission', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(this.editingSubmission)
-                });
-
-                if (!response.ok) throw new Error('Failed to save changes');
-
-                this.editingSubmission = null;
-                await this.loadSubmissions();
-            } catch (error) {
-                alert('Error saving changes: ' + error.message);
-            } finally {
-                this.isProcessing = false;
+        prevPage() {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+                this.expandedSubmissions = [];
+                this.fetchSidebarSubmissions();
             }
         },
         formatDate(dateString) {
-            return new Date(dateString).toLocaleString();
+            if (!dateString) return 'Unknown Date';
+            return new Date(dateString).toLocaleDateString(undefined, {
+                year: 'numeric', month: 'short', day: 'numeric'
+            });
         },
         async loadLevels() {
+            this.isLoadingLevels = true;
             try {
-                const list = await fetchList();
+                const list = await fetchList(this.store.listType);
                 this.levels = list || [];
             } catch (error) {
+                console.error('Error loading levels:', error);
                 this.levels = [];
+            }
+            finally {
+                this.isLoadingLevels = false;
             }
         }
     },
@@ -675,18 +688,13 @@ export default {
                 this.renderTurnstile();
             });
         }
-
-        const token = localStorage.getItem('admin_token');
-        if (token) {
-            this.loadSubmissions();
-        }
         this.loadLevels();
     },
     beforeUnmount() {
         if (window.turnstile && this.turnstileWidgetId !== null) {
             try {
                 window.turnstile.remove(this.turnstileWidgetId);
-            } catch (e) {}
+            } catch (e) { }
         }
     }
 };

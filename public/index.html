@@ -2,17 +2,16 @@
 <html lang="en">
 
 <head>
-    <!-- THIS IS A FORK OF THE TSL!!!!-->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>The Piss List | Pretty Pissy Geometry Dash</title>
     <meta name="description"
-        content="The Piss List is a challenge list of piss themed GD levels!. Submit records, view the leaderboard, and challenge yourself with our challeges!" />
+        content="The Piss List is a challenge list of piss themed GD levels! You can Submit records, view the leaderboard, and challenge yourself with our levels!" />
     <meta name="keywords"
         content="Geometry Dash, Demon List, TPL, Piss, Challenge List, Pissy, GD Leaderboard, Extreme Demon, The Piss List, TPL, Geo Dash, Cube Game, water, pissing, Slop, Worst, Discord, Game, Challenge, Piss List, CeeCee, " />
 
-    <meta property="og:title" content="The Piss List - Leaderboard" />
+    <meta property="og:title" content="The Piss List" />
     <meta property="og:description" content="View the hardest Geometry Dash levels and player rankings on the TPL." />
     <meta property="og:image" content="/list_icon.png" />
     <meta property="og:url" content="https://thepisslist.com" />
@@ -32,7 +31,7 @@
     <link rel="stylesheet" type="text/css" href="/css/pages/roulette.css" />
     <link rel="stylesheet" type="text/css" href="/css/pages/admin.css" />
     <link rel="stylesheet" type="text/css" href="/css/pages/manage.css" />
-    <link rel="stylesheet" type="text/css" href="/css/pages/submit.css" />
+    <link rel="stylesheet" type="text/css" href="/css/pages/submissions.css" />
     <link rel="stylesheet" type="text/css" href="/css/components/nav.css" />
     <link rel="stylesheet" type="text/css" href="/css/components/btn.css" />
     <link rel="stylesheet" type="text/css" href="/css/components/tabs.css" />
@@ -40,6 +39,8 @@
     <script src="https://unpkg.com/vue-router@4.0.14/dist/vue-router.global.prod.js"></script>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <script type="module" src="/js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8857138658839773"
         crossorigin="anonymous"></script>
 </head>
@@ -47,39 +48,61 @@
 <body id="app">
     <noscript>
         <h1>The Piss List</h1>
-        <p>Welcome to The Piss List (TPL), tracking the hardest levels verified!</p>
+        <p>Welcome to The Piss List, tracking the hardest Pissy levels verified!</p>
     </noscript>
-    <header>
-        <div class="logo">
-            <h2>TPL</h2>
-            <p class="version-numb">v3.0.1</p>
-        </div>
-        <nav class="nav">
-            <router-link class="nav__tab" to="/">
-                <span class="type-label-lg">List</span>
-            </router-link>
-            <router-link class="nav__tab" to="/packs">
-                <span class="type-label-lg">Packs</span>
-            </router-link>
-            <router-link class="nav__tab" to="/leaderboard">
-                <span class="type-label-lg">Leaderboard</span>
-            </router-link>
-            <router-link class="nav__tab" to="/roulette">
-                <span class="type-label-lg">Roulette</span>
-            </router-link>
-            <div class="nav__actions">
-                <a class="nav__icon" href="https://discord.gg/br8kcPTfFx">
-                    <img src="/assets/discord.svg" alt="Discord Logo" />
+<header>    
+    <div class="logo">
+        <h2>TPCL</h2>
+        <p class="version-numb">v2.8.1</p>
+    </div>
+    <nav class="nav">
+        <router-link class="nav__tab" to="/">
+            <span class="type-label-lg">List</span>
+        </router-link>
+        <router-link class="nav__tab" to="/packs">
+            <span class="type-label-lg">Packs</span>
+        </router-link>
+        <router-link class="nav__tab" to="/leaderboard">
+            <span class="type-label-lg">Leaderboard</span>
+        </router-link>
+        <router-link class="nav__tab" to="/roulette">
+            <span class="type-label-lg">Roulette</span>
+        </router-link>
+        
+        <div class="nav__actions">
+            <a class="nav__cta type-label-lg desktop-submit" href="#/submit" target="_blank">
+                Submit Records
+            </a>
+            <a class="nav__cta type-label-lg desktop-submit" href="#/submit" target="_blank">
+                Submit Levels
+            </a>
+            <a class="nav__icon desktop-submit" href="https://discord.gg/anVgZRXa53">
+            <img src="/assets/discord.svg" alt="Discord Logo" />
+            </a>    
+            <!-- retired for now.. Gabri I'm going to call Epstein if you put this back in (skibidi)
+                <a class="nav__cta type-label-lg desktop-submit" href="https://youtu.be/iik25wqIuFo?si=EOcrI_Jma_BwotyL" target="_blank">
+                    SUPER FUNNY 67 BUTTON
                 </a>
-                <a class="nav__cta type-label-lg" href="#/submit" target="_blank">
-                    Submit Records
-                </a>
-                <a class="nav__cta type-label-lg" href="#/submit" target="_blank">
-                    Submit Levels
-                </a>
+            -->
             </div>
-        </nav>
-    </header>
+            <div class="top-right-controls type-title-sm">
+            <a class="nav__icon mobile-discord" href="https://discord.gg/anVgZRXa53">
+                <img src="/assets/discord.svg" alt="Discord Logo" style="height: 1.25rem;" />
+            </a>
+            <a class="nav__cta type-label-lg mobile-submit" href="#/submit" target="_blank">
+                Submit
+            </a>
+            <div class="list-toggle-container">
+                <button @click="switchList('TPCL')" :class="{ 'active-list-btn': store.listType === 'TPCL' }" class="list-btn type-title-sm">
+                    TPCL
+                </button>
+                <button @click="switchList('TPL')" :class="{ 'active-list-btn': store.listType === 'TPL' }" class="list-btn type-title-sm">
+                    TPL
+                </button>
+            </div>
+        </div>
+    </nav>
+</header>
     <router-view></router-view>
 </body>
 

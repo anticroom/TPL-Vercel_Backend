@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     try {
         if (req.method === 'GET') {
             try {
-                verifyToken(req);
+                await verifyToken(req); 
                 return res.status(200).json({ success: true, message: "Token valid" });
             } catch (error) {
                 return res.status(401).json({ success: false, error: "Invalid or expired token" });
@@ -22,6 +22,10 @@ export default async function handler(req, res) {
         if (req.method === 'POST') {
             const { username, email, password } = req.body;
             const { management, admins, mods } = await getLogins();
+
+            if (!management || management.length === 0) {
+                console.error("[CRITICAL ERROR] Management list is empty.");
+            }
 
             let user = management.find(u => 
                 u.username.toLowerCase() === username.toLowerCase() && 
@@ -68,6 +72,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: "Method not allowed" });
 
     } catch (error) {
+        console.error("[LOGIN SERVER ERROR]", error);
         return res.status(500).json({ error: 'Server Error' });
     }
 }

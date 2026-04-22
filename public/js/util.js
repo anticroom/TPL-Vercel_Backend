@@ -111,7 +111,7 @@ export function embed(video) {
     const safeSrc = src.replace(/"/g, '&quot;');
 
     if (platform === "mp4") {
-        return `<video class="video" id="videoframe" src="${safeSrc}" controls autoplay playsinline loop></video>`;
+        return `<video class="video" id="videoframe" src="${safeSrc}" controls autoplay playsinline loop style="width: 100%; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain; background: #000; border-radius: 8px;"></video>`;
     }
 
     return `<iframe class="video" id="videoframe" src="${safeSrc}" frameborder="0" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
@@ -165,6 +165,7 @@ export function getThumbnailFromId(urlOrId) {
         if (id) return `https://cdn.loom.com/sessions/thumbnails/${id}-with-play.gif`;
     } 
 
+    // 2. Returns fallback for unsupported platforms (Vimeo, Streamable, MP4, etc.)
     return DEFAULT_THUMB;
 }
 
