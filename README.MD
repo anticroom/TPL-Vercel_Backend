@@ -152,7 +152,7 @@ To access the admin panel, you must manually create the first management account
 }
 ```
 
-Once your account is created, go to /#/manage and login using the credentials you created from the previous step then you're done.
+Once your account is created, go to /#/manage on your list and login using the credentials you created from the previous step then you're done.
 
 ---
 
