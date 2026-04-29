@@ -2,7 +2,7 @@ import routes from './routes.js';
 
 export const store = Vue.reactive({
     dark: JSON.parse(localStorage.getItem('dark')) || false,
-    listType: localStorage.getItem('listType') || 'TPCLnpm in',
+    listType: localStorage.getItem('listType') || 'TPCL',
 
     toggleDark() {
         this.dark = !this.dark;
