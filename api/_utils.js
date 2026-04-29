@@ -156,7 +156,7 @@ export async function auditLog(decodedUser, action, details) {
                                         body: JSON.stringify({
                                             content: msg,
                                             username: "LIST UPDATES",
-                                            avatar_url: "https://denouementdl.vercel.app/list_icon.png"
+                                            avatar_url: "https://thepisslist.com/list_icon.png"
                                         })
                                     });
                                 } catch (e) { console.error("Webhook Error (Bulk Level):", e); }
@@ -175,7 +175,7 @@ export async function auditLog(decodedUser, action, details) {
                     body: JSON.stringify({
                         content: publicMsg,
                         username: "LIST UPDATES",
-                        avatar_url: "https://denouementdl.vercel.app/list_icon.png"
+                        avatar_url: "https://thepisslist.com/list_icon.png"
                     })
                 });
             } catch (e) {
@@ -261,7 +261,7 @@ export async function auditLog(decodedUser, action, details) {
                     body: JSON.stringify({
                         content: completionMsg,
                         username: "Completion Updates",
-                        avatar_url: "https://denouementdl.vercel.app/list_icon.png"
+                        avatar_url: "https://thepisslist.com/list_icon.png"
                     })
                 });
             } catch (e) {
