@@ -1,10 +1,11 @@
 import { round, score } from './score.js';
+import { LIST1, LIST2 } from './config.js';
 
 const MEMORY_CACHE = {
-    listLite: { TPCL: null, TPL: null },
-    listFull: { TPCL: null, TPL: null },
-    packs: { TPCL: null, TPL: null },
-    rules: { TPCL: null, TPL: null },
+    listLite: { [LIST1]: null, [LIST2]: null },
+    listFull: { [LIST1]: null, [LIST2]: null },
+    packs: { [LIST1]: null, [LIST2]: null },
+    rules: { [LIST1]: null, [LIST2]: null },
     editors: null,
     records: {}
 };
@@ -14,7 +15,7 @@ const shouldBypassCache = () => {
     return hash.includes('/admin') || hash.includes('/manage');
 };
 
-export async function fetchList(type = 'TPCL', full = false) {
+export async function fetchList(type = LIST1, full = false) {
     const bypass = shouldBypassCache();
     
     if (!bypass) {
@@ -68,10 +69,11 @@ export async function fetchList(type = 'TPCL', full = false) {
     }
 }
 
-export async function fetchRecords(dbId, type = 'TPCL') {
+export async function fetchRecords(dbId, type = LIST1) {
     const bypass = shouldBypassCache();
-    if (!bypass && MEMORY_CACHE.records[dbId]) {
-        return MEMORY_CACHE.records[dbId];
+    const cacheKey = `${type}_${dbId}`;
+    if (!bypass && MEMORY_CACHE.records[cacheKey]) {
+        return MEMORY_CACHE.records[cacheKey];
     }
 
     try {
@@ -79,16 +81,16 @@ export async function fetchRecords(dbId, type = 'TPCL') {
         const response = await fetch(url);
         if (!response.ok) return [];
         const records = await response.json();
-        const sorted = records.sort((a, b) => b.percent - a.percent);
-        
-        MEMORY_CACHE.records[dbId] = sorted;
+        const sorted = records.sort((a, b) => (b.percent || 0) - (a.percent || 0));
+
+        MEMORY_CACHE.records[cacheKey] = sorted;
         return sorted;
     } catch {
         return [];
     }
 }
 
-export async function fetchPacks(type = 'TPCL') {
+export async function fetchPacks(type = LIST1) {
     const bypass = shouldBypassCache();
     if (!bypass && MEMORY_CACHE.packs[type]) {
         return MEMORY_CACHE.packs[type];
@@ -107,7 +109,7 @@ export async function fetchPacks(type = 'TPCL') {
     }
 }
 
-export async function fetchRules(type = 'TPCL') {
+export async function fetchRules(type = LIST1) {
     const bypass = shouldBypassCache();
     if (!bypass && MEMORY_CACHE.rules[type]) {
         return MEMORY_CACHE.rules[type];
@@ -145,7 +147,7 @@ export async function fetchEditors() {
     }
 }
 
-export async function fetchLeaderboard(type = 'TPCL') {
+export async function fetchLeaderboard(type = LIST1) {
     try {
         const [list, packsData] = await Promise.all([fetchList(type, true), fetchPacks(type)]);
         if (!list) return [[], []];

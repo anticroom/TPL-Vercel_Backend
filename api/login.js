@@ -20,35 +20,33 @@ export default async function handler(req, res) {
         }
 
         if (req.method === 'POST') {
-            const { username, email, password } = req.body;
-            const { management, admins, mods } = await getLogins();
+            const { username, email, password } = req.body || {};
 
-            if (!management || management.length === 0) {
+            if (!username || !email || !password) {
+                return res.status(400).json({ error: 'Username, email and password are required' });
+            }
+
+            const { management = [], admins = [], mods = [] } = await getLogins();
+
+            if (management.length === 0) {
                 console.error("[CRITICAL ERROR] Management list is empty.");
             }
 
-            let user = management.find(u => 
-                u.username.toLowerCase() === username.toLowerCase() && 
-                u.email.toLowerCase() === email.toLowerCase() &&
-                u.password === password
-            );
+            const matches = (u) =>
+                u.username?.toLowerCase() === username.toLowerCase() &&
+                u.email?.toLowerCase() === email.toLowerCase() &&
+                u.password === password;
+
+            let user = management.find(matches);
             let role = 'management';
 
             if (!user) {
-                user = admins.find(u => 
-                    u.username.toLowerCase() === username.toLowerCase() && 
-                    u.email.toLowerCase() === email.toLowerCase() && 
-                    u.password === password
-                );
+                user = admins.find(matches);
                 role = 'admin';
             }
 
             if (!user) {
-                user = mods.find(u => 
-                    u.username.toLowerCase() === username.toLowerCase() && 
-                    u.email.toLowerCase() === email.toLowerCase() && 
-                    u.password === password
-                );
+                user = mods.find(matches);
                 role = 'mod';
             }
 

@@ -9,3 +9,4 @@ data/
 /api/_logins.json
 .env
 .README.md
+.env*.local

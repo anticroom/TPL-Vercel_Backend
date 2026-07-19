@@ -1,5 +1,6 @@
 import { verifyToken, auditLog } from './_utils.js';
 import { query } from './_db.js';
+import { LIST1, LIST2 } from './_config.js';
 import { randomUUID } from 'crypto';
 
 const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET;
@@ -88,7 +89,7 @@ export default async function handler(req, res) {
 
 async function handlePublicView(req, res) {
     try {
-        const listType = req.query.listType || 'DDL';
+        const listType = req.query.listType || LIST1;
         const type = req.query.type || 'record';
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 50;
@@ -183,7 +184,7 @@ async function handleSubmitRecord(req, res) {
             `INSERT INTO public.submissions (id, level_name, username, percent, hz, discord, video_link, notes, status, list_type, created_at)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
              RETURNING *`,
-            [submissionId, safeLevelName, safeUsername, percent, hz || null, safeDiscord, videoLink, safeNotes || null, 'pending', listType || 'DDL']
+            [submissionId, safeLevelName, safeUsername, percent, hz || null, safeDiscord, videoLink, safeNotes || null, 'pending', listType || LIST1]
         );
 
         return res.status(201).json({
@@ -230,7 +231,7 @@ async function handleSubmitLevel(req, res) {
             `INSERT INTO public.submissions (id, submission_type, name, id_gd, author, verifier, verification, percent_to_qualify, placement_suggestion, notes, status, list_type, created_at)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW())
              RETURNING *`,
-            [submissionId, 'level', safeName, id, safeAuthor, safeVerifier || null, verification, percentToQualify || 100, safePlacementSuggestion || null, safeNotes || null, 'pending', listType || 'DDL']
+            [submissionId, 'level', safeName, id, safeAuthor, safeVerifier || null, verification, percentToQualify || 100, safePlacementSuggestion || null, safeNotes || null, 'pending', listType || LIST1]
         );
 
         return res.status(201).json({
@@ -250,7 +251,7 @@ async function handleGetSubmissions(req, res, decoded) {
             return res.status(403).json({ error: 'Insufficient permissions' });
         }
 
-        const targetListType = req.query.listType || 'DDL';
+        const targetListType = req.query.listType || LIST1;
 
         const result = await query(
             `SELECT * FROM public.submissions 
@@ -290,7 +291,7 @@ async function handleGetSubmissions(req, res, decoded) {
 
 async function processSingleSubmission(submission, subAction, reason, overrides, decoded) {
     const submissionType = submission.submission_type || 'record';
-    const targetList = submission.list_type || 'DDL';
+    const targetList = submission.list_type || LIST1;
 
     if (submissionType === 'level' && decoded.role === 'mod') {
         throw new Error('Mods cannot process level submissions');
@@ -306,7 +307,7 @@ async function processSingleSubmission(submission, subAction, reason, overrides,
             const finalPlacement = overrides.placement_suggestion !== undefined ? overrides.placement_suggestion : submission.placement_suggestion;
             const finalIdGd = overrides.id_gd !== undefined ? overrides.id_gd : submission.id_gd;
 
-            const tableName = targetList === 'DCL' ? 'public.levels_2' : 'public.levels';
+            const tableName = targetList === LIST2 ? 'public.levels_2' : 'public.levels';
 
             const newLevelDbId = Math.floor(Date.now() / 1000) + Math.floor(Math.random() * 1000);
             const newLevelUUID = randomUUID();
@@ -371,7 +372,7 @@ async function processSingleSubmission(submission, subAction, reason, overrides,
             let levelData = null;
             let tableName = null;
 
-            const preferredTable = targetList === 'DCL' ? 'public.levels_2' : 'public.levels';
+            const preferredTable = targetList === LIST2 ? 'public.levels_2' : 'public.levels';
 
             let levelResult = await query(
                 `SELECT id, data, name FROM ${preferredTable} WHERE name = $1`,
@@ -616,7 +617,7 @@ async function handleUpdateRecords(req, res, decoded) {
         }
 
         const { oldLevelId, newLevelData, type } = req.body;
-        const tableName = type === 'DCL' ? 'public.levels_2' : 'public.levels';
+        const tableName = type === LIST2 ? 'public.levels_2' : 'public.levels';
 
         if (!oldLevelId || !newLevelData) return res.status(400).json({ error: 'Missing Data' });
 
@@ -649,7 +650,7 @@ async function handleUpdateRecords(req, res, decoded) {
             oldLevel: oldContent,
             newLevel: updatedContent,
             rank: currentDBRow.rank,
-            list: type || 'DDL',
+            list: type || LIST1,
             notes: newLevelData.editNotes || null,
             reason: newLevelData.editReason || null
         });

@@ -1,8 +1,11 @@
 import routes from './routes.js';
+import { LIST1, LIST2 } from './config.js';
 
 export const store = Vue.reactive({
     dark: JSON.parse(localStorage.getItem('dark')) || false,
-    listType: localStorage.getItem('listType') || 'TPCL',
+    listType: localStorage.getItem('listType') || LIST1,
+    list1: LIST1,
+    list2: LIST2,
 
     toggleDark() {
         this.dark = !this.dark;
@@ -19,24 +22,16 @@ export const store = Vue.reactive({
         const root = document.documentElement;
         const logo = document.querySelector('header .logo h2');
 
-        if (type === 'TPL') {
+        if (type === LIST2) {
             root.style.setProperty('--color-primary', '#feb33b');
             root.style.setProperty('--color-primary-level', '#ffd498');
-            
-            if (logo) {
-                logo.innerText = logo.innerText.replace('TPCL', 'TPL');
-                if (logo.innerText === 'The Piss List') logo.innerText = 'The Piss List'; 
-                if (!logo.innerText.includes('TPL')) logo.innerText = 'TPL';
-            }
+
+            if (logo && !logo.innerText.includes(LIST2)) logo.innerText = LIST2;
         } else {
             root.style.removeProperty('--color-primary');
             root.style.removeProperty('--color-primary-level');
 
-            if (logo) {
-                logo.innerText = logo.innerText.replace('TPL', 'TPCL');
-                if (logo.innerText === 'The Piss List') logo.innerText = 'The Piss List';
-                if (!logo.innerText.includes('TPCL')) logo.innerText = 'TPCL';
-            }
+            if (logo && !logo.innerText.includes(LIST1)) logo.innerText = LIST1;
         }
     }
 });
@@ -49,12 +44,11 @@ const router = VueRouter.createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-    let title = "TPCL | The Piss List";
+    const listPrefix = store.listType === LIST2 ? LIST2 : LIST1;
+    const listName = "The Piss List";
+    let title = `${listPrefix} | ${listName}`;
 
-    const listPrefix = store.listType === 'TPL' ? 'TPL' : 'TPCL';
-    const listName = store.listType === 'TPL' ? 'The Piss List' : 'The Piss List';
-
-    if (to.path === '/' || to.params._id) title = `${listPrefix} | ${listName}`;
+    if (to.path === '/' || to.params.id) title = `${listPrefix} | ${listName}`;
     else if (to.path === '/leaderboard') title = "Leaderboard | " + listPrefix;
     else if (to.path === '/roulette') title = "Roulette | " + listPrefix;
     else if (to.path === '/admin') title = "Admin Panel | " + listPrefix;

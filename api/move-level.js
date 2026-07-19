@@ -1,5 +1,6 @@
 import { verifyToken, auditLog } from './_utils.js';
 import { query } from './_db.js';
+import { LIST1, LIST2 } from './_config.js';
 
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -17,13 +18,13 @@ export default async function handler(req, res) {
             return res.status(403).json({ error: 'Only admins and owners can move levels' });
         }
 
-        const listName = type === 'TPL' ? 'TPL' : 'TPCL';
-        const tableName = type === 'TPL' ? 'public.levels_2' : 'public.levels';
+        const listName = type === LIST2 ? LIST2 : LIST1;
+        const tableName = type === LIST2 ? 'public.levels_2' : 'public.levels';
 
-        const oldRank = oldIndex + 1;
-        const newRank = newIndex + 1;
+        const oldRank = parseInt(oldIndex) + 1;
+        const newRank = parseInt(newIndex) + 1;
 
-        if (oldRank < 1 || newRank < 1) {
+        if (!Number.isInteger(oldRank) || !Number.isInteger(newRank) || oldRank < 1 || newRank < 1) {
             return res.status(400).json({ error: "Invalid move indices" });
         }
 

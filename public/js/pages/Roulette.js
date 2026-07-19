@@ -1,6 +1,7 @@
 import { fetchList } from '../content.js';
 import { embed, shuffle } from '../util.js';
 import { store } from '../main.js';
+import { LIST1, LIST2 } from '../config.js';
 
 import Spinner from '../components/Spinner.js';
 import Btn from '../components/Btn.js';
@@ -25,7 +26,7 @@ export default {
                                     <div class="list-group">
                                         <div class="check">
                                             <input type="checkbox" id="TPCL" v-model="useTPCL">
-                                            <label for="TPCL" class="type-label-lg">Include TPCL</label>
+                                            <label for="TPCL" class="type-label-lg">Include {{ store.list1 }}</label>
                                         </div>
                                         <div class="sub-checks" v-if="useTPCL">
                                             <div class="check" v-if="hasTPCLMain">
@@ -46,7 +47,7 @@ export default {
                                     <div class="list-group">
                                         <div class="check">
                                             <input type="checkbox" id="TPL" v-model="useTPL">
-                                            <label for="TPL" class="type-label-lg">Include TPL</label>
+                                            <label for="TPL" class="type-label-lg">Include {{ store.list2 }}</label>
                                         </div>
                                         <div class="sub-checks" v-if="useTPL">
                                             <div class="check" v-if="hasTPLMain">
@@ -235,8 +236,8 @@ export default {
         this.fileInput.addEventListener('change', this.onImportUpload);
 
         const [TPCLData, TPLData] = await Promise.all([
-            fetchList('TPCL'),
-            fetchList('TPL')
+            fetchList(LIST1),
+            fetchList(LIST2)
         ]);
 
         if (TPCLData) {
@@ -244,7 +245,7 @@ export default {
                 if (!lvl) return null;
                 return {
                     ...lvl,
-                    listType: 'TPCL',
+                    listType: LIST1,
                     rank: index + 1,
                     video: lvl.verification || lvl.video
                 };
@@ -256,7 +257,7 @@ export default {
                 if (!lvl) return null;
                 return {
                     ...lvl,
-                    listType: 'TPL',
+                    listType: LIST2,
                     rank: index + 1,
                     video: lvl.verification || lvl.video
                 };
@@ -267,7 +268,7 @@ export default {
             this.showToast('Warning: Failed to load levels.');
         }
         
-        if (this.store.listType === 'TPL') {
+        if (this.store.listType === LIST2) {
             this.useTPCL = false;
             this.useTPL = true;
         } else {

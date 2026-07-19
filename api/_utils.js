@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { query } from './_db.js';
+import { LIST1, LIST2 } from './_config.js';
 
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 const DISCORD_UPDATE_WEBHOOK_URL = process.env.DISCORD_UPDATE_WEBHOOK_URL;
@@ -42,13 +43,13 @@ export async function getLogins() {
         const result = await query("SELECT data FROM public.system WHERE key = '_logins'");
 
         if (result.rows.length === 0) {
-            return { management: [], admins: [] };
+            return { management: [], admins: [], mods: [] };
         }
 
-        return result.rows[0].data;
+        return { management: [], admins: [], mods: [], ...(result.rows[0].data || {}) };
     } catch (err) {
         console.error("Database Error (getLogins):", err);
-        return { management: [], admins: [] };
+        return { management: [], admins: [], mods: [] };
     }
 }
 
@@ -63,7 +64,7 @@ export async function verifyToken(req) {
         const { management, admins, mods } = await getLogins();
         const allUsers = [...(management || []), ...(admins || []), ...(mods || [])];
         
-        if (!allUsers.some(u => u.username.toLowerCase() === decoded.username.toLowerCase())) {
+        if (!decoded.username || !allUsers.some(u => u.username?.toLowerCase() === decoded.username.toLowerCase())) {
             throw new Error('User revoked');
         }
         
@@ -76,10 +77,10 @@ export async function verifyToken(req) {
 export async function auditLog(decodedUser, action, details) {
     if (!decodedUser || !decodedUser.username) return;
 
-    const listType = details.list || 'TPCL';
-    const tableName = listType === 'TPL' ? 'public.levels_2' : 'public.levels';
+    const listType = details.list || LIST1;
+    const tableName = listType === LIST2 ? 'public.levels_2' : 'public.levels';
 
-    const updateWebhook = listType === 'TPL' ? DISCORD_UPDATE_WEBHOOK_URL_2 : DISCORD_UPDATE_WEBHOOK_URL;
+    const updateWebhook = listType === LIST2 ? DISCORD_UPDATE_WEBHOOK_URL_2 : DISCORD_UPDATE_WEBHOOK_URL;
 
     if (updateWebhook) {
         let publicMsg = null;
@@ -149,7 +150,8 @@ export async function auditLog(decodedUser, action, details) {
                                 const msg = `## ${targetList} List Update\n- **${name}** has been placed at **#${rank}**${neighbors}`;
 
                                 try {
-                                    const targetHook = targetList === 'TPL' ? DISCORD_UPDATE_WEBHOOK_URL_2 : DISCORD_UPDATE_WEBHOOK_URL;
+                                    const targetHook = targetList === LIST2 ? DISCORD_UPDATE_WEBHOOK_URL_2 : DISCORD_UPDATE_WEBHOOK_URL;
+                                    if (!targetHook) continue;
                                     await fetch(targetHook, {
                                         method: 'POST',
                                         headers: { 'Content-Type': 'application/json' },

@@ -1,5 +1,6 @@
 import { verifyToken, auditLog } from './_utils.js';
 import { query } from './_db.js';
+import { LIST1, LIST2 } from './_config.js';
 
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -19,8 +20,8 @@ export default async function handler(req, res) {
 
         if (!id) return res.status(400).json({ error: 'Level ID is required' });
 
-        const listName = type === 'TPCL' ? 'TPL' : 'TPCL';
-        const tableName = type === 'TPL' ? 'public.levels_2' : 'public.levels';
+        const listName = type === LIST2 ? LIST2 : LIST1;
+        const tableName = type === LIST2 ? 'public.levels_2' : 'public.levels';
 
         const fetchRes = await query(`SELECT rank, data, name FROM ${tableName} WHERE id = $1`, [id]);
         

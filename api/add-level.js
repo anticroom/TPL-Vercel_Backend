@@ -1,5 +1,6 @@
 import { verifyToken, auditLog } from './_utils.js';
 import { query } from './_db.js';
+import { LIST1, LIST2 } from './_config.js';
 
 function sanitizeRecords(records) {
     if (!Array.isArray(records)) return [];
@@ -38,17 +39,17 @@ export default async function handler(req, res) {
             return res.status(403).json({ error: 'Only admins can add levels' });
         }
 
-        const listName = type === 'TPL' ? 'TPL' : 'TPCL';
-        const tableName = type === 'TPL' ? 'public.levels_2' : 'public.levels';
+        const listName = type === LIST2 ? LIST2 : LIST1;
+        const tableName = type === LIST2 ? 'public.levels_2' : 'public.levels';
         const realName = levelData.name;
 
         if (levelData.records) {
             levelData.records = sanitizeRecords(levelData.records);
         }
 
-        let targetRank = placement;
+        let targetRank = parseInt(placement);
 
-        if (!targetRank) {
+        if (!targetRank || targetRank < 1) {
             const maxResult = await query(`SELECT MAX(rank) as max_rank FROM ${tableName}`);
             targetRank = parseInt(maxResult.rows[0]?.max_rank || 0) + 1;
         }

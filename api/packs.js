@@ -1,5 +1,6 @@
 import { verifyToken, auditLog } from './_utils.js';
 import { query } from './_db.js';
+import { LIST1 } from './_config.js';
 
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -11,7 +12,7 @@ export default async function handler(req, res) {
 
     if (req.method === 'GET') {
         try {
-            const listType = req.query.type || 'TPCL';
+            const listType = req.query.type || LIST1;
             const result = await query("SELECT * FROM public.packs WHERE list_type = $1 ORDER BY name ASC", [listType]);
             return res.status(200).json(result.rows);
         } catch (error) {
@@ -24,7 +25,7 @@ export default async function handler(req, res) {
         try {
             const decoded = await verifyToken(req);
             const { action, type } = req.body;
-            const listType = type || 'TPCL';
+            const listType = type || LIST1;
 
             if (decoded.role !== 'admin' && decoded.role !== 'management') {
                 await auditLog(decoded, "UNAUTHORIZED_ACCESS", { target: "Pack Management" });

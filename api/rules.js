@@ -1,5 +1,6 @@
 import { verifyToken, auditLog } from './_utils.js';
 import { query } from './_db.js';
+import { LIST1, LIST2 } from './_config.js';
 
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -10,8 +11,9 @@ export default async function handler(req, res) {
     if (req.method === 'OPTIONS') return res.status(200).end();
 
     try {
-        const type = (req.query.type || req.body.type || 'TPCL').toUpperCase();
-        const dbKey = type === 'TPL' ? 'rules_TPL' : 'rules_TPCL';
+        const rawType = req.query.type || (req.body && req.body.type) || LIST1;
+        const type = String(rawType).toUpperCase() === LIST2.toUpperCase() ? LIST2 : LIST1;
+        const dbKey = type === LIST2 ? `rules_${LIST2}` : `rules_${LIST1}`;
 
         if (req.method === 'GET') {
             const result = await query("SELECT data FROM public.system WHERE key = $1", [dbKey]);

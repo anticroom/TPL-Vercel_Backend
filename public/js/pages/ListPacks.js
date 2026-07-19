@@ -1,5 +1,6 @@
 import { store } from "../main.js";
 import { fetchList, fetchPacks, fetchRecords } from "../content.js";
+import { LIST1, LIST2 } from "../config.js";
 import { embed } from "../util.js";
 import { score } from "../score.js";
 
@@ -277,8 +278,8 @@ export default {
             this.loading = true;
             try {
                 const [tpcl, tpl, packsData] = await Promise.all([
-                    fetchList('TPCL', false), 
-                    fetchList('TPL', false), 
+                    fetchList(LIST1, false),
+                    fetchList(LIST2, false),
                     fetchPacks(this.store.listType)
                 ]);
 
@@ -313,10 +314,10 @@ export default {
         getLevelInfo(dbId) {
             if (!dbId) return { name: '', rank: 999, level: null, type: null };
 
-            const primaryList = this.store.listType === 'TPL' ? this.tplList : this.tpclList;
-            const secondaryList = this.store.listType === 'TPL' ? this.tpclList : this.tplList;
+            const primaryList = this.store.listType === LIST2 ? this.tplList : this.tpclList;
+            const secondaryList = this.store.listType === LIST2 ? this.tpclList : this.tplList;
             const primaryType = this.store.listType;
-            const secondaryType = this.store.listType === 'TPL' ? 'TPCL' : 'TPL';
+            const secondaryType = this.store.listType === LIST2 ? LIST1 : LIST2;
 
             const primaryIndex = primaryList.findIndex(([lvl]) => String(lvl?._id) === String(dbId));
             if (primaryIndex !== -1) {

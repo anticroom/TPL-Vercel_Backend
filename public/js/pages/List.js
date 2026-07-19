@@ -2,6 +2,7 @@ import { store } from "../main.js";
 import { embed } from "../util.js";
 import { score } from "../score.js";
 import { fetchEditors, fetchList, fetchRules, fetchPacks } from "../content.js";
+import { LIST1, LIST2 } from "../config.js";
 import { renderMarkdown } from "../markdown.js";
 
 import LevelAuthors from "../components/List/LevelAuthors.js";
@@ -336,13 +337,25 @@ export default {
         roleIconMap,
         store,
         toggledShowcase: false,
+        syncingTypeFromUrl: false,
     }),
 
     watch: {
         'store.listType': async function (newType) {
+            if (this.syncingTypeFromUrl) {
+                this.syncingTypeFromUrl = false;
+                return;
+            }
+
             this.mobileView = 'list';
             this.searchQuery = "";
             await this.loadData();
+
+            const routeType = (this.$route.params.type || '').toUpperCase();
+            if (routeType === newType.toUpperCase() && this.$route.params.id) {
+                this.syncSelectionFromUrl();
+                return;
+            }
 
             const [firstItem] = this.list || [];
             const [firstLevel] = firstItem || [];
@@ -371,12 +384,15 @@ export default {
         },
         '$route.params': async function (newParams) {
             if (newParams.type) {
-                const newType = newParams.type.toUpperCase();
-                if (this.store.listType !== newType) {
+                const routeType = newParams.type.toUpperCase();
+                const newType = routeType === LIST2.toUpperCase() ? LIST2
+                    : (routeType === LIST1.toUpperCase() ? LIST1 : null);
+
+                if (newType && this.store.listType !== newType) {
                     this.store.setListType(newType);
                 } else {
                     const item = this.list[this.selected];
-                    const lvl = item ? item : null;
+                    const [lvl] = item || [];
                     const currentId = lvl ? String(lvl._id || lvl.id) : null;
 
                     if (currentId !== String(newParams.id)) {
@@ -470,7 +486,6 @@ export default {
             .rule-text a { color: var(--color-primary); text-decoration: underline; }
             .rule-text code { background: rgba(255,255,255,0.1); padding: 2px 4px; border-radius: 3px; font-family: monospace; }
             
-            /* Global Page Transition */
             .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
             .fade-enter, .fade-leave-to { opacity: 0; }
             .fade-enter-from, .fade-leave-to { opacity: 0; }
@@ -483,8 +498,11 @@ export default {
 
         if (this.$route.params.type) {
             const routeType = this.$route.params.type.toUpperCase();
-            if ((routeType === 'TPCL' || routeType === 'TPL') && this.store.listType !== routeType) {
-                this.store.setListType(routeType);
+            const urlType = routeType === LIST2.toUpperCase() ? LIST2
+                : (routeType === LIST1.toUpperCase() ? LIST1 : null);
+            if (urlType && this.store.listType !== urlType) {
+                this.syncingTypeFromUrl = true;
+                this.store.setListType(urlType);
             }
         }
 
