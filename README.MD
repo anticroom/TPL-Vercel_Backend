@@ -147,7 +147,7 @@ To access the admin panel, you must manually create the first management account
       "password": "1234"
     }
   ],
-  "admins": []
+  "admins": [],
   "mods": []
 }
 ```
