@@ -79,7 +79,7 @@ CREATE TABLE public.submissions (
 INSERT INTO public.system (key, data) VALUES 
 ('_logins', '{"management": [], "admins": []}'),
 ('_editors', '[]'),
-('_vips, '[]')
+('_vips', '[]'),
 ('rules', '{"level_rules": [], "record_rules": []}');
 
 ALTER TABLE public.levels DISABLE ROW LEVEL SECURITY;
